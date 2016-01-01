@@ -1,0 +1,33 @@
+Caminho do hardware  Dispositivo  Classe         Descrição
+============================================================
+                                  system         Computer
+/0                                bus            Motherboard
+/0/0                              memory         3866MiB Memória do sistema
+/0/1                              processor      Intel(R) Core(TM) i3-5005U CPU @ 2.00GHz
+/0/100                            bridge         Broadwell-U Host Bridge -OPI
+/0/100/2                          display        Broadwell-U Integrated Graphics
+/0/100/3                          multimedia     Broadwell-U Audio Controller
+/0/100/14                         bus            Wildcat Point-LP USB xHCI Controller
+/0/100/14/0          usb2         bus            xHCI Host Controller
+/0/100/14/1          usb1         bus            xHCI Host Controller
+/0/100/14/1/5                     communication  Atheros AR3012 Bluetooth
+/0/100/14/1/7                     multimedia     HD WebCam
+/0/100/16                         communication  Wildcat Point-LP MEI Controller #1
+/0/100/1b                         multimedia     Wildcat Point-LP High Definition Audio Controller
+/0/100/1c                         bridge         Wildcat Point-LP PCI Express Root Port #1
+/0/100/1c.2                       bridge         Wildcat Point-LP PCI Express Root Port #3
+/0/100/1c.2/0                     generic        Realtek Semiconductor Co., Ltd.
+/0/100/1c.2/0.1      enp2s0f1     network        RTL8111/8168/8411 PCI Express Gigabit Ethernet Controller
+/0/100/1c.3                       bridge         Wildcat Point-LP PCI Express Root Port #4
+/0/100/1c.3/0        wlp3s0       network        QCA9565 / AR9565 Wireless Network Adapter
+/0/100/1f                         bridge         Wildcat Point-LP LPC Controller
+/0/100/1f.2                       storage        Wildcat Point-LP SATA Controller [AHCI Mode]
+/0/100/1f.3                       bus            Wildcat Point-LP SMBus Controller
+/0/100/1f.6                       generic        Wildcat Point-LP Thermal Management Controller
+/0/2                 scsi0        storage        
+/0/2/0.0.0           /dev/sda     disk           1TB WDC WD10JPVX-22J
+/0/2/0.0.0/1                      volume         242MiB Windows FAT volume
+/0/2/0.0.0/2         /dev/sda2    volume         59GiB volume EXT4
+/0/2/0.0.0/3         /dev/sda3    volume         4004MiB Linux swap volume
+/0/3                 scsi1        storage        
+/0/3/0.0.0           /dev/cdrom   disk           DVDRAM GUC0N

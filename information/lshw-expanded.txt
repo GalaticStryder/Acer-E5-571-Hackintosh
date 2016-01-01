@@ -1,0 +1,320 @@
+monalisa
+    descrição: Computer
+    largura: 64 bits
+    capacidades: smbios-2.7 vsyscall32
+  *-core
+       descrição: Motherboard
+       ID físico: 0
+     *-memory
+          descrição: Memória do sistema
+          ID físico: 0
+          tamanho: 3866MiB
+     *-cpu
+          produto: Intel(R) Core(TM) i3-5005U CPU @ 2.00GHz
+          fabricante: Intel Corp.
+          ID físico: 1
+          informações do barramento: cpu@0
+          tamanho: 2GHz
+          largura: 64 bits
+          capacidades: fpu fpu_exception wp vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp x86-64 constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch arat epb pln pts dtherm intel_pt tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap xsaveopt cpufreq
+     *-pci
+          descrição: Host bridge
+          produto: Broadwell-U Host Bridge -OPI
+          fabricante: Intel Corporation
+          ID físico: 100
+          informações do barramento: pci@0000:00:00.0
+          versão: 09
+          largura: 32 bits
+          clock: 33MHz
+          configuração: driver=bdw_uncore
+          recursos: irq:0
+        *-display
+             descrição: VGA compatible controller
+             produto: Broadwell-U Integrated Graphics
+             fabricante: Intel Corporation
+             ID físico: 2
+             informações do barramento: pci@0000:00:02.0
+             versão: 09
+             largura: 64 bits
+             clock: 33MHz
+             capacidades: msi pm vga_controller bus_master cap_list rom
+             configuração: driver=i915 latency=0
+             recursos: irq:49 memória:c0000000-c0ffffff memória:b0000000-bfffffff porta de E/S:4000(tamanho=64)
+        *-multimedia:0
+             descrição: Audio device
+             produto: Broadwell-U Audio Controller
+             fabricante: Intel Corporation
+             ID físico: 3
+             informações do barramento: pci@0000:00:03.0
+             versão: 09
+             largura: 64 bits
+             clock: 33MHz
+             capacidades: pm msi pciexpress bus_master cap_list
+             configuração: driver=snd_hda_intel latency=0
+             recursos: irq:52 memória:c1210000-c1213fff
+        *-usb
+             descrição: USB controller
+             produto: Wildcat Point-LP USB xHCI Controller
+             fabricante: Intel Corporation
+             ID físico: 14
+             informações do barramento: pci@0000:00:14.0
+             versão: 03
+             largura: 64 bits
+             clock: 33MHz
+             capacidades: pm msi xhci bus_master cap_list
+             configuração: driver=xhci_hcd latency=0
+             recursos: irq:45 memória:c1200000-c120ffff
+           *-usbhost:0
+                produto: xHCI Host Controller
+                fabricante: Linux 4.2.0-22-generic xhci-hcd
+                ID físico: 0
+                informações do barramento: usb@2
+                nome lógico: usb2
+                versão: 4.02
+                capacidades: usb-3.00
+                configuração: driver=hub slots=4 speed=5000Mbit/s
+           *-usbhost:1
+                produto: xHCI Host Controller
+                fabricante: Linux 4.2.0-22-generic xhci-hcd
+                ID físico: 1
+                informações do barramento: usb@1
+                nome lógico: usb1
+                versão: 4.02
+                capacidades: usb-2.00
+                configuração: driver=hub slots=11 speed=480Mbit/s
+              *-usb:0
+                   descrição: Interface sem fio bluetooth
+                   produto: Atheros AR3012 Bluetooth
+                   fabricante: Lite-On Technology Corp.
+                   ID físico: 5
+                   informações do barramento: usb@1:5
+                   versão: 0.02
+                   capacidades: bluetooth usb-1.10
+                   configuração: driver=btusb maxpower=100mA speed=12Mbit/s
+              *-usb:1
+                   descrição: Vídeo
+                   produto: HD WebCam
+                   fabricante: Chicony Electronics Co.,Ltd.
+                   ID físico: 7
+                   informações do barramento: usb@1:7
+                   versão: 28.57
+                   capacidades: usb-2.00
+                   configuração: driver=uvcvideo maxpower=500mA speed=480Mbit/s
+        *-communication
+             descrição: Communication controller
+             produto: Wildcat Point-LP MEI Controller #1
+             fabricante: Intel Corporation
+             ID físico: 16
+             informações do barramento: pci@0000:00:16.0
+             versão: 03
+             largura: 64 bits
+             clock: 33MHz
+             capacidades: pm msi bus_master cap_list
+             configuração: driver=mei_me latency=0
+             recursos: irq:50 memória:c1219000-c121901f
+        *-multimedia:1
+             descrição: Audio device
+             produto: Wildcat Point-LP High Definition Audio Controller
+             fabricante: Intel Corporation
+             ID físico: 1b
+             informações do barramento: pci@0000:00:1b.0
+             versão: 03
+             largura: 64 bits
+             clock: 33MHz
+             capacidades: pm msi bus_master cap_list
+             configuração: driver=snd_hda_intel latency=64
+             recursos: irq:51 memória:c1214000-c1217fff
+        *-pci:0
+             descrição: PCI bridge
+             produto: Wildcat Point-LP PCI Express Root Port #1
+             fabricante: Intel Corporation
+             ID físico: 1c
+             informações do barramento: pci@0000:00:1c.0
+             versão: e3
+             largura: 32 bits
+             clock: 33MHz
+             capacidades: pci pciexpress msi pm normal_decode bus_master cap_list
+             configuração: driver=pcieport
+             recursos: irq:42 porta de E/S:2000(tamanho=4096) memória:a0100000-a02fffff porta de E/S:a0300000(tamanho=2097152)
+        *-pci:1
+             descrição: PCI bridge
+             produto: Wildcat Point-LP PCI Express Root Port #3
+             fabricante: Intel Corporation
+             ID físico: 1c.2
+             informações do barramento: pci@0000:00:1c.2
+             versão: e3
+             largura: 32 bits
+             clock: 33MHz
+             capacidades: pci pciexpress msi pm normal_decode bus_master cap_list
+             configuração: driver=pcieport
+             recursos: irq:43 porta de E/S:3000(tamanho=4096) memória:c1100000-c11fffff
+           *-generic
+                descrição: Unassigned class
+                produto: Realtek Semiconductor Co., Ltd.
+                fabricante: Realtek Semiconductor Co., Ltd.
+                ID físico: 0
+                informações do barramento: pci@0000:02:00.0
+                versão: 01
+                largura: 32 bits
+                clock: 33MHz
+                capacidades: pm msi pciexpress msix vpd bus_master cap_list rom
+                configuração: driver=rtsx_pci latency=0
+                recursos: irq:46 memória:c1105000-c1105fff memória:c1110000-c111ffff
+           *-network
+                descrição: Ethernet interface
+                produto: RTL8111/8168/8411 PCI Express Gigabit Ethernet Controller
+                fabricante: Realtek Semiconductor Co., Ltd.
+                ID físico: 0.1
+                informações do barramento: pci@0000:02:00.1
+                nome lógico: enp2s0f1
+                versão: 12
+                serial: f8:a9:63:65:e1:d8
+                tamanho: 10Mbit/s
+                capacidade: 1Gbit/s
+                largura: 64 bits
+                clock: 33MHz
+                capacidades: pm msi pciexpress msix vpd bus_master cap_list ethernet physical tp mii 10bt 10bt-fd 100bt 100bt-fd 1000bt 1000bt-fd autonegotiation
+                configuração: autonegotiation=on broadcast=yes driver=r8169 driverversion=2.3LK-NAPI duplex=half firmware=rtl8411-2_0.0.1 07/08/13 latency=0 link=no multicast=yes port=MII speed=10Mbit/s
+                recursos: irq:48 porta de E/S:3000(tamanho=256) memória:c1104000-c1104fff memória:c1100000-c1103fff
+        *-pci:2
+             descrição: PCI bridge
+             produto: Wildcat Point-LP PCI Express Root Port #4
+             fabricante: Intel Corporation
+             ID físico: 1c.3
+             informações do barramento: pci@0000:00:1c.3
+             versão: e3
+             largura: 32 bits
+             clock: 33MHz
+             capacidades: pci pciexpress msi pm normal_decode bus_master cap_list
+             configuração: driver=pcieport
+             recursos: irq:44 memória:c1000000-c10fffff
+           *-network
+                descrição: Interface sem fio
+                produto: QCA9565 / AR9565 Wireless Network Adapter
+                fabricante: Qualcomm Atheros
+                ID físico: 0
+                informações do barramento: pci@0000:03:00.0
+                nome lógico: wlp3s0
+                versão: 01
+                serial: 5c:c9:d3:52:aa:4c
+                largura: 64 bits
+                clock: 33MHz
+                capacidades: pm msi pciexpress bus_master cap_list rom ethernet physical wireless
+                configuração: broadcast=yes driver=ath9k driverversion=4.2.0-22-generic firmware=N/A ip=192.168.1.2 latency=0 link=yes multicast=yes wireless=IEEE 802.11bgn
+                recursos: irq:19 memória:c1000000-c107ffff memória:c1080000-c108ffff
+        *-isa
+             descrição: ISA bridge
+             produto: Wildcat Point-LP LPC Controller
+             fabricante: Intel Corporation
+             ID físico: 1f
+             informações do barramento: pci@0000:00:1f.0
+             versão: 03
+             largura: 32 bits
+             clock: 33MHz
+             capacidades: isa bus_master cap_list
+             configuração: driver=lpc_ich latency=0
+             recursos: irq:0
+        *-storage
+             descrição: SATA controller
+             produto: Wildcat Point-LP SATA Controller [AHCI Mode]
+             fabricante: Intel Corporation
+             ID físico: 1f.2
+             informações do barramento: pci@0000:00:1f.2
+             versão: 03
+             largura: 32 bits
+             clock: 66MHz
+             capacidades: storage msi pm ahci_1.0 bus_master cap_list
+             configuração: driver=ahci latency=0
+             recursos: irq:47 porta de E/S:4088(tamanho=8) porta de E/S:4094(tamanho=4) porta de E/S:4080(tamanho=8) porta de E/S:4090(tamanho=4) porta de E/S:4060(tamanho=32) memória:c121c000-c121c7ff
+        *-serial DISPONÍVEL
+             descrição: SMBus
+             produto: Wildcat Point-LP SMBus Controller
+             fabricante: Intel Corporation
+             ID físico: 1f.3
+             informações do barramento: pci@0000:00:1f.3
+             versão: 03
+             largura: 64 bits
+             clock: 33MHz
+             configuração: latency=0
+             recursos: memória:c1218000-c12180ff porta de E/S:4040(tamanho=32)
+        *-generic DISPONÍVEL
+             descrição: Signal processing controller
+             produto: Wildcat Point-LP Thermal Management Controller
+             fabricante: Intel Corporation
+             ID físico: 1f.6
+             informações do barramento: pci@0000:00:1f.6
+             versão: 03
+             largura: 64 bits
+             clock: 33MHz
+             capacidades: pm msi bus_master cap_list
+             configuração: latency=0
+             recursos: memória:c121b000-c121bfff
+     *-scsi:0
+          ID físico: 2
+          nome lógico: scsi0
+          capacidades: emulated
+        *-disk
+             descrição: ATA Disk
+             produto: WDC WD10JPVX-22J
+             fabricante: Western Digital
+             ID físico: 0.0.0
+             informações do barramento: scsi@0:0.0.0
+             nome lógico: /dev/sda
+             versão: 1A01
+             serial: WD-WXC1A459K0Y2
+             tamanho: 931GiB (1TB)
+             capacidades: gpt-1.00 partitioned partitioned:gpt
+             configuração: ansiversion=5 guid=a72fcb4c-ea52-465d-b252-d2ea19ea93dc logicalsectorsize=512 sectorsize=4096
+           *-volume:0 DISPONÍVEL
+                descrição: Windows FAT volume
+                fabricante: mkfs.fat
+                ID físico: 1
+                informações do barramento: scsi@0:0.0.0,1
+                versão: FAT32
+                serial: f5b9-d83b
+                tamanho: 241MiB
+                capacidade: 242MiB
+                capacidades: boot fat initialized
+                configuração: FATs=2 filesystem=fat
+           *-volume:1
+                descrição: volume EXT4
+                fabricante: Linux
+                ID físico: 2
+                informações do barramento: scsi@0:0.0.0,2
+                nome lógico: /dev/sda2
+                nome lógico: /
+                versão: 1.0
+                serial: a34c0b79-bfd3-4c7b-af2e-ad96fdf72b95
+                tamanho: 59GiB
+                capacidades: journaled extended_attributes large_files huge_files dir_nlink recover extents ext4 ext2 initialized
+                configuração: created=2015-12-30 16:15:55 filesystem=ext4 lastmountpoint=/ modified=2016-01-01 18:25:40 mount.fstype=ext4 mount.options=rw,relatime,errors=remount-ro,data=ordered mounted=2016-01-01 18:25:45 state=mounted
+           *-volume:2
+                descrição: Linux swap volume
+                fabricante: Linux
+                ID físico: 3
+                informações do barramento: scsi@0:0.0.0,3
+                nome lógico: /dev/sda3
+                versão: 1
+                serial: dcc50060-e4e7-454c-8b5f-68952380c81b
+                tamanho: 4004MiB
+                capacidade: 4004MiB
+                capacidades: nofs swap initialized
+                configuração: filesystem=swap pagesize=4095
+     *-scsi:1
+          ID físico: 3
+          nome lógico: scsi1
+          capacidades: emulated
+        *-cdrom
+             descrição: DVD-RAM writer
+             produto: DVDRAM GUC0N
+             fabricante: HL-DT-ST
+             ID físico: 0.0.0
+             informações do barramento: scsi@1:0.0.0
+             nome lógico: /dev/cdrom
+             nome lógico: /dev/cdrw
+             nome lógico: /dev/dvd
+             nome lógico: /dev/dvdrw
+             nome lógico: /dev/sr0
+             versão: 1.00
+             capacidades: removable audio cd-r cd-rw dvd dvd-r dvd-ram
+             configuração: ansiversion=5 status=nodisc

@@ -79,20 +79,20 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
     External (_SB_.IFFS.FFSS, UnknownObj)
     External (_SB_.PCCD, UnknownObj)
     External (_SB_.PCCD.PENB, UnknownObj)
-    External (_SB_.PCI0.B0D3.ABAR, FieldUnitObj)
-    External (_SB_.PCI0.B0D3.BARA, IntObj)
+    External (_SB_.PCI0.HDAU.ABAR, FieldUnitObj)
+    External (_SB_.PCI0.HDAU.BARA, IntObj)
     External (_SB_.PCI0.EPON, MethodObj)    // 0 Arguments
-    External (_SB_.PCI0.GFX0.AINT, MethodObj)    // 2 Arguments
-    External (_SB_.PCI0.GFX0.CLID, FieldUnitObj)
-    External (_SB_.PCI0.GFX0.DD1F, UnknownObj)
-    External (_SB_.PCI0.GFX0.GHDS, MethodObj)    // 1 Arguments
-    External (_SB_.PCI0.GFX0.GLID, MethodObj)    // 1 Arguments
-    External (_SB_.PCI0.GFX0.GSCI, MethodObj)    // 0 Arguments
-    External (_SB_.PCI0.GFX0.GSSE, FieldUnitObj)
-    External (_SB_.PCI0.GFX0.IUEH, MethodObj)    // 1 Arguments
-    External (_SB_.PCI0.GFX0.STAT, FieldUnitObj)
-    External (_SB_.PCI0.GFX0.TCHE, FieldUnitObj)
-    External (_SB_.PCI0.GFX0.WKAR, MethodObj)    // 0 Arguments
+    External (_SB_.PCI0.IGPU.AINT, MethodObj)    // 2 Arguments
+    External (_SB_.PCI0.IGPU.CLID, FieldUnitObj)
+    External (_SB_.PCI0.IGPU.DD1F, UnknownObj)
+    External (_SB_.PCI0.IGPU.GHDS, MethodObj)    // 1 Arguments
+    External (_SB_.PCI0.IGPU.GLID, MethodObj)    // 1 Arguments
+    External (_SB_.PCI0.IGPU.GSCI, MethodObj)    // 0 Arguments
+    External (_SB_.PCI0.IGPU.GSSE, FieldUnitObj)
+    External (_SB_.PCI0.IGPU.IUEH, MethodObj)    // 1 Arguments
+    External (_SB_.PCI0.IGPU.STAT, FieldUnitObj)
+    External (_SB_.PCI0.IGPU.TCHE, FieldUnitObj)
+    External (_SB_.PCI0.IGPU.WKAR, MethodObj)    // 0 Arguments
     External (_SB_.PCI0.PEG0.HPME, MethodObj)    // 0 Arguments
     External (_SB_.PCI0.PEG1.HPME, MethodObj)    // 0 Arguments
     External (_SB_.PCI0.PEG2.HPME, MethodObj)    // 0 Arguments
@@ -2560,20 +2560,181 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     }
                 }
 
-                Device (B0D3)
+                Device (HDAU)
                 {
                     Name (_ADR, 0x00030000)  // _ADR: Address
+                    Method (_DSM, 4, NotSerialized)
+                    {
+                        If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }
+                        Return (Package()
+                        {
+                            "layout-id", Buffer() { 12, 0x00, 0x00, 0x00 },
+                            "hda-gfx", Buffer() { "onboard-1" },
+                        })
+                    }
                 }
 
-                Device (GFX0)
+                Device (IGPU)
                 {
                     Name (_ADR, 0x00020000)  // _ADR: Address
+                    OperationRegion (RMPC, PCI_Config, 0x10, 4)
+                    Field (RMPC, AnyAcc, NoLock, Preserve)
+                    {
+                        BAR1,32,
+                    }
+                    Device (PNLF)
+                    {
+                        // normal PNLF declares (note some of this probably not necessary)
+                        Name (_ADR, Zero)
+                        Name (_HID, EisaId ("APP0002"))
+                        Name (_CID, "backlight")
+                        Name (_UID, 15)
+                        Name (_STA, 0x0B)
+                        //define hardware register access for brightness
+                        // lower nibble of BAR1 is status bits and not part of the address
+                        OperationRegion (BRIT, SystemMemory, And(^BAR1, Not(0xF)), 0xe1184)
+                        Field (BRIT, AnyAcc, Lock, Preserve)
+                        {
+                            Offset(0x48250),
+                            LEV2, 32,
+                            LEVL, 32,
+                            Offset(0x70040),
+                            P0BL, 32,
+                            Offset(0xc8250),
+                            LEVW, 32,
+                            LEVX, 32,
+                            Offset(0xe1180),
+                            PCHL, 32,
+                        }
+                        // LMAX: use 0xad9/0x56c/0x5db to force OS X value
+                        //       or use any arbitrary value
+                        //       or use 0 to capture BIOS setting
+                        Name (LMAX, 0xad9)
+                        // KMAX: defines the unscaled range in the _BCL table below
+                        Name (KMAX, 0xad9)
+                        // _INI deals with differences between native setting and desired
+                        Method (_INI, 0, NotSerialized)
+                        {
+                            // This 0xC value comes from looking what OS X initializes this
+                            // register to after display sleep (using ACPIDebug/ACPIPoller)
+                            Store(0xC0000000, LEVW)
+                            // determine LMAX to use
+                            If (LNot(LMAX)) { Store(ShiftRight(LEVX,16), LMAX) }
+                            If (LNot(LMAX)) { Store(KMAX, LMAX) }
+                            If (LNotEqual(LMAX, KMAX))
+                            {
+                                // Scale all the values in _BCL to the PWM max in use
+                                Store(0, Local0)
+                                While (LLess(Local0, SizeOf(_BCL)))
+                                {
+                                    Store(DerefOf(Index(_BCL,Local0)), Local1)
+                                    Divide(Multiply(Local1,LMAX), KMAX,, Local1)
+                                    Store(Local1, Index(_BCL,Local0))
+                                    Increment(Local0)
+                                }
+                                // Also scale XRGL and XRGH values
+                                Divide(Multiply(XRGL,LMAX), KMAX,, XRGL)
+                                Divide(Multiply(XRGH,LMAX), KMAX,, XRGH)
+                            }
+                            // adjust values to desired LMAX
+                            Store(ShiftRight(LEVX,16), Local1)
+                            If (LNotEqual(Local1, LMAX))
+                            {
+                                Store(And(LEVX,0xFFFF), Local0)
+                                If (LOr(LNot(Local0),LNot(Local1))) { Store(LMAX, Local0) Store(LMAX, Local1) }
+                                Divide(Multiply(Local0,LMAX), Local1,, Local0)
+                                //REVIEW: wait for vblank before setting new PWM config
+                                //Store(P0BL, Local7)
+                                //While (LEqual (P0BL, Local7)) {}
+                                Store(Or(Local0,ShiftLeft(LMAX,16)), LEVX)
+                            }
+                        }
+                        // _BCM/_BQC: set/get for brightness level
+                        Method (_BCM, 1, NotSerialized)
+                        {
+                            // store new backlight level
+                            Store(Match(_BCL, MGE, Arg0, MTR, 0, 2), Local0)
+                            If (LEqual(Local0, Ones)) { Subtract(SizeOf(_BCL), 1, Local0) }
+                            Store(Or(DerefOf(Index(_BCL,Local0)),ShiftLeft(LMAX,16)), LEVX)
+                        }
+                        Method (_BQC, 0, NotSerialized)
+                        {
+                            Store(Match(_BCL, MGE, And(LEVX, 0xFFFF), MTR, 0, 2), Local0)
+                            If (LEqual(Local0, Ones)) { Subtract(SizeOf(_BCL), 1, Local0) }
+                            Return(DerefOf(Index(_BCL, Local0)))
+                        }
+                        Method (_DOS, 1, NotSerialized)
+                        {
+                            // Note: Some systems have this defined in DSDT, so uncomment
+                            // the next line if that is the case.
+                            External(^^_DOS, MethodObj)
+                            ^^_DOS(Arg0)
+                        }
+                        // extended _BCM/_BQC for setting "in between" levels
+                        Method (XBCM, 1, NotSerialized)
+                        {
+                            // store new backlight level
+                            If (LGreater(Arg0, XRGH)) { Store(XRGH, Arg0) }
+                            If (LAnd(Arg0, LLess(Arg0, XRGL))) { Store(XRGL, Arg0) }
+                            Store(Or(Arg0,ShiftLeft(LMAX,16)), LEVX)
+                        }
+                        Method (XBQC, 0, NotSerialized)
+                        {
+                            Store(And(LEVX,0xFFFF), Local0)
+                            If (LGreater(Local0, XRGH)) { Store(XRGH, Local0) }
+                            If (LAnd(Local0, LLess(Local0, XRGL))) { Store(XRGL, Local0) }
+                            Return(Local0)
+                        }
+                        // Set XOPT bit 0 to disable smooth transitions
+                        // Set XOPT bit 1 to wait for native BacklightHandler
+                        // Set XOPT bit 2 to force use of native BacklightHandler
+                        Name (XOPT, 0x02)
+                        // XRGL/XRGH: defines the valid range
+                        Name (XRGL, 25)
+                        Name (XRGH, 2777)
+                        // _BCL: returns list of valid brightness levels
+                        // first two entries describe ac/battery power levels
+                        Name (_BCL, Package()
+                        {
+                            2777,
+                            748,
+                            0,
+                            35, 39, 44, 50,
+                            58, 67, 77, 88,
+                            101, 115, 130, 147,
+                            165, 184, 204, 226,
+                            249, 273, 299, 326,
+                            354, 383, 414, 446,
+                            479, 514, 549, 587,
+                            625, 665, 706, 748,
+                            791, 836, 882, 930,
+                            978, 1028, 1079, 1132,
+                            1186, 1241, 1297, 1355,
+                            1414, 1474, 1535, 1598,
+                            1662, 1728, 1794, 1862,
+                            1931, 2002, 2074, 2147,
+                            2221, 2296, 2373, 2452,
+                            2531, 2612, 2694, 2777,
+                        })
+                    }
+                    Method (_DSM, 4, NotSerialized)
+                    {
+                        If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }
+                        Return (Package()
+                        {
+                            "hda-gfx", Buffer() { "onboard-1" },
+                        })
+                    }
                 }
 
                 Device (B0D4)
                 {
                     Name (_ADR, 0x00040000)  // _ADR: Address
                 }
+            }
+            Device (IMEI)
+            {
+                Name (_ADR, 0x00160000)
             }
         }
     }
@@ -2783,6 +2944,14 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 RAEN,   1, 
                     ,   13, 
                 RCBA,   18
+            }
+            Method (_DSM, 4, NotSerialized)
+            {
+                Store (Package (0x02) {
+                    "compatible", Buffer () {"pci8086,8c44"}
+                }, Local0)
+                DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))
+                Return (Local0)
             }
         }
     }
@@ -3664,6 +3833,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     Store (One, PMES)
                     Notify (GLAN, 0x02)
                 }
+                Return (Zero)
             }
         }
 
@@ -3698,6 +3868,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     Store (One, PMES)
                     Notify (EHC1, 0x02)
                 }
+                Return (Zero)
             }
 
             Method (_S3D, 0, NotSerialized)  // _S3D: S3 Device State
@@ -3760,236 +3931,28 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     {
                         Name (_ADR, 0x04)  // _ADR: Address
                         Alias (SBV1, SDGV)
-                        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-                        {
-                            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                            If (LEqual (Arg0, ToUUID ("a5fc708f-8775-4ba6-bd0c-ba90a1ec72f8")))
-                            {
-                                While (One)
-                                {
-                                    Store (ToInteger (Arg2), _T_0)
-                                    If (LEqual (_T_0, Zero))
-                                    {
-                                        If (LEqual (Arg1, One))
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x07                                           
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x00                                           
-                                            })
-                                        }
-                                    }
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, One))
-                                        {
-                                            If (LEqual (SDGV, 0xFF))
-                                            {
-                                                Return (Zero)
-                                            }
-                                            Else
-                                            {
-                                                Return (One)
-                                            }
-                                        }
-                                        Else
-                                        {
-                                            If (LEqual (_T_0, 0x02))
-                                            {
-                                                Return (SDGV)
-                                            }
-                                        }
-                                    }
-
-                                    Break
-                                }
-                            }
-
-                            Return (Zero)
-                        }
+                        
                     }
 
                     Device (PR15)
                     {
                         Name (_ADR, 0x05)  // _ADR: Address
                         Alias (SBV2, SDGV)
-                        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-                        {
-                            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                            If (LEqual (Arg0, ToUUID ("a5fc708f-8775-4ba6-bd0c-ba90a1ec72f8")))
-                            {
-                                While (One)
-                                {
-                                    Store (ToInteger (Arg2), _T_0)
-                                    If (LEqual (_T_0, Zero))
-                                    {
-                                        If (LEqual (Arg1, One))
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x07                                           
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x00                                           
-                                            })
-                                        }
-                                    }
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, One))
-                                        {
-                                            If (LEqual (SDGV, 0xFF))
-                                            {
-                                                Return (Zero)
-                                            }
-                                            Else
-                                            {
-                                                Return (One)
-                                            }
-                                        }
-                                        Else
-                                        {
-                                            If (LEqual (_T_0, 0x02))
-                                            {
-                                                Return (SDGV)
-                                            }
-                                        }
-                                    }
-
-                                    Break
-                                }
-                            }
-
-                            Return (Zero)
-                        }
+                        
                     }
 
                     Device (PR16)
                     {
                         Name (_ADR, 0x06)  // _ADR: Address
                         Alias (SBV1, SDGV)
-                        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-                        {
-                            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                            If (LEqual (Arg0, ToUUID ("a5fc708f-8775-4ba6-bd0c-ba90a1ec72f8")))
-                            {
-                                While (One)
-                                {
-                                    Store (ToInteger (Arg2), _T_0)
-                                    If (LEqual (_T_0, Zero))
-                                    {
-                                        If (LEqual (Arg1, One))
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x07                                           
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x00                                           
-                                            })
-                                        }
-                                    }
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, One))
-                                        {
-                                            If (LEqual (SDGV, 0xFF))
-                                            {
-                                                Return (Zero)
-                                            }
-                                            Else
-                                            {
-                                                Return (One)
-                                            }
-                                        }
-                                        Else
-                                        {
-                                            If (LEqual (_T_0, 0x02))
-                                            {
-                                                Return (SDGV)
-                                            }
-                                        }
-                                    }
-
-                                    Break
-                                }
-                            }
-
-                            Return (Zero)
-                        }
+                        
                     }
 
                     Device (PR17)
                     {
                         Name (_ADR, 0x07)  // _ADR: Address
                         Alias (SBV2, SDGV)
-                        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-                        {
-                            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                            If (LEqual (Arg0, ToUUID ("a5fc708f-8775-4ba6-bd0c-ba90a1ec72f8")))
-                            {
-                                While (One)
-                                {
-                                    Store (ToInteger (Arg2), _T_0)
-                                    If (LEqual (_T_0, Zero))
-                                    {
-                                        If (LEqual (Arg1, One))
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x07                                           
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x00                                           
-                                            })
-                                        }
-                                    }
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, One))
-                                        {
-                                            If (LEqual (SDGV, 0xFF))
-                                            {
-                                                Return (Zero)
-                                            }
-                                            Else
-                                            {
-                                                Return (One)
-                                            }
-                                        }
-                                        Else
-                                        {
-                                            If (LEqual (_T_0, 0x02))
-                                            {
-                                                Return (SDGV)
-                                            }
-                                        }
-                                    }
-
-                                    Break
-                                }
-                            }
-
-                            Return (Zero)
-                        }
+                        
                     }
 
                     Device (PR18)
@@ -4036,6 +3999,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     Store (One, PMES)
                     Notify (EHC2, 0x02)
                 }
+                Return (Zero)
             }
 
             Method (_S3D, 0, NotSerialized)  // _S3D: S3 Device State
@@ -4088,118 +4052,14 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     {
                         Name (_ADR, 0x02)  // _ADR: Address
                         Alias (SBV1, SDGV)
-                        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-                        {
-                            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                            If (LEqual (Arg0, ToUUID ("a5fc708f-8775-4ba6-bd0c-ba90a1ec72f8")))
-                            {
-                                While (One)
-                                {
-                                    Store (ToInteger (Arg2), _T_0)
-                                    If (LEqual (_T_0, Zero))
-                                    {
-                                        If (LEqual (Arg1, One))
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x07                                           
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x00                                           
-                                            })
-                                        }
-                                    }
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, One))
-                                        {
-                                            If (LEqual (SDGV, 0xFF))
-                                            {
-                                                Return (Zero)
-                                            }
-                                            Else
-                                            {
-                                                Return (One)
-                                            }
-                                        }
-                                        Else
-                                        {
-                                            If (LEqual (_T_0, 0x02))
-                                            {
-                                                Return (SDGV)
-                                            }
-                                        }
-                                    }
-
-                                    Break
-                                }
-                            }
-
-                            Return (Zero)
-                        }
+                        
                     }
 
                     Device (PR13)
                     {
                         Name (_ADR, 0x03)  // _ADR: Address
                         Alias (SBV2, SDGV)
-                        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-                        {
-                            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                            If (LEqual (Arg0, ToUUID ("a5fc708f-8775-4ba6-bd0c-ba90a1ec72f8")))
-                            {
-                                While (One)
-                                {
-                                    Store (ToInteger (Arg2), _T_0)
-                                    If (LEqual (_T_0, Zero))
-                                    {
-                                        If (LEqual (Arg1, One))
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x07                                           
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x00                                           
-                                            })
-                                        }
-                                    }
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, One))
-                                        {
-                                            If (LEqual (SDGV, 0xFF))
-                                            {
-                                                Return (Zero)
-                                            }
-                                            Else
-                                            {
-                                                Return (One)
-                                            }
-                                        }
-                                        Else
-                                        {
-                                            If (LEqual (_T_0, 0x02))
-                                            {
-                                                Return (SDGV)
-                                            }
-                                        }
-                                    }
-
-                                    Break
-                                }
-                            }
-
-                            Return (Zero)
-                        }
+                        
                     }
 
                     Device (PR14)
@@ -4288,6 +4148,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 {
                     Notify (XHC, 0x02)
                 }
+                Return (Zero)
             }
 
             OperationRegion (XHCP, SystemMemory, Add (GPCB (), 0x000A0000), 0x0100)
@@ -4301,95 +4162,95 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
             Method (PRTE, 1, Serialized)
             {
-                Name (_T_2, Zero)  // _T_x: Emitted by ASL Compiler
-                Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_2, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_1, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 If (LLessEqual (Arg0, XHPC))
                 {
                     If (LEqual (PCHV (), LPTH))
                     {
                         While (One)
                         {
-                            Store (Arg0, _T_0)
-                            If (LEqual (_T_0, One))
+                            Store (Arg0, T_0)
+                            If (LEqual (T_0, One))
                             {
                                 Return (And (PR2, One))
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x02))
+                                If (LEqual (T_0, 0x02))
                                 {
                                     Return (And (PR2, 0x02))
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x03))
+                                    If (LEqual (T_0, 0x03))
                                     {
                                         Return (And (PR2, 0x04))
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x04))
+                                        If (LEqual (T_0, 0x04))
                                         {
                                             Return (And (PR2, 0x08))
                                         }
                                         Else
                                         {
-                                            If (LEqual (_T_0, 0x05))
+                                            If (LEqual (T_0, 0x05))
                                             {
                                                 Return (And (PR2, 0x0100))
                                             }
                                             Else
                                             {
-                                                If (LEqual (_T_0, 0x06))
+                                                If (LEqual (T_0, 0x06))
                                                 {
                                                     Return (And (PR2, 0x0200))
                                                 }
                                                 Else
                                                 {
-                                                    If (LEqual (_T_0, 0x07))
+                                                    If (LEqual (T_0, 0x07))
                                                     {
                                                         Return (And (PR2, 0x0400))
                                                     }
                                                     Else
                                                     {
-                                                        If (LEqual (_T_0, 0x08))
+                                                        If (LEqual (T_0, 0x08))
                                                         {
                                                             Return (And (PR2, 0x0800))
                                                         }
                                                         Else
                                                         {
-                                                            If (LEqual (_T_0, 0x09))
+                                                            If (LEqual (T_0, 0x09))
                                                             {
                                                                 Return (And (PR2, 0x10))
                                                             }
                                                             Else
                                                             {
-                                                                If (LEqual (_T_0, 0x0A))
+                                                                If (LEqual (T_0, 0x0A))
                                                                 {
                                                                     Return (And (PR2, 0x20))
                                                                 }
                                                                 Else
                                                                 {
-                                                                    If (LEqual (_T_0, 0x0B))
+                                                                    If (LEqual (T_0, 0x0B))
                                                                     {
                                                                         Return (And (PR2, 0x1000))
                                                                     }
                                                                     Else
                                                                     {
-                                                                        If (LEqual (_T_0, 0x0C))
+                                                                        If (LEqual (T_0, 0x0C))
                                                                         {
                                                                             Return (And (PR2, 0x2000))
                                                                         }
                                                                         Else
                                                                         {
-                                                                            If (LEqual (_T_0, 0x0D))
+                                                                            If (LEqual (T_0, 0x0D))
                                                                             {
                                                                                 Return (And (PR2, 0x40))
                                                                             }
                                                                             Else
                                                                             {
-                                                                                If (LEqual (_T_0, 0x0E))
+                                                                                If (LEqual (T_0, 0x0E))
                                                                                 {
                                                                                     Return (And (PR2, 0x80))
                                                                                 }
@@ -4418,62 +4279,62 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     {
                         While (One)
                         {
-                            Store (Arg0, _T_1)
-                            If (LEqual (_T_1, One))
+                            Store (Arg0, T_1)
+                            If (LEqual (T_1, One))
                             {
                                 Return (And (PR2, One))
                             }
                             Else
                             {
-                                If (LEqual (_T_1, 0x02))
+                                If (LEqual (T_1, 0x02))
                                 {
                                     Return (And (PR2, 0x02))
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_1, 0x03))
+                                    If (LEqual (T_1, 0x03))
                                     {
                                         Return (And (PR2, 0x04))
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_1, 0x04))
+                                        If (LEqual (T_1, 0x04))
                                         {
                                             Return (And (PR2, 0x08))
                                         }
                                         Else
                                         {
-                                            If (LEqual (_T_1, 0x05))
+                                            If (LEqual (T_1, 0x05))
                                             {
                                                 Return (And (PR2, 0x10))
                                             }
                                             Else
                                             {
-                                                If (LEqual (_T_1, 0x06))
+                                                If (LEqual (T_1, 0x06))
                                                 {
                                                     Return (And (PR2, 0x20))
                                                 }
                                                 Else
                                                 {
-                                                    If (LEqual (_T_1, 0x07))
+                                                    If (LEqual (T_1, 0x07))
                                                     {
                                                         Return (And (PR2, 0x40))
                                                     }
                                                     Else
                                                     {
-                                                        If (LEqual (_T_1, 0x08))
+                                                        If (LEqual (T_1, 0x08))
                                                         {
                                                             Return (And (PR2, 0x80))
                                                         }
                                                         Else
                                                         {
-                                                            If (LEqual (_T_1, 0x09))
+                                                            If (LEqual (T_1, 0x09))
                                                             {
                                                                 Return (And (PR2, 0x0100))
                                                             }
                                                             Else
                                                             {
-                                                                If (LEqual (_T_1, 0x0A))
+                                                                If (LEqual (T_1, 0x0A))
                                                                 {
                                                                     Return (And (PR2, 0x0200))
                                                                 }
@@ -4519,38 +4380,38 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     Subtract (Arg0, XSPA, Local0)
                     While (One)
                     {
-                        Store (Local0, _T_2)
-                        If (LEqual (_T_2, Zero))
+                        Store (Local0, T_2)
+                        If (LEqual (T_2, Zero))
                         {
                             Return (And (PR3, One))
                         }
                         Else
                         {
-                            If (LEqual (_T_2, One))
+                            If (LEqual (T_2, One))
                             {
                                 Return (And (PR3, 0x02))
                             }
                             Else
                             {
-                                If (LEqual (_T_2, 0x02))
+                                If (LEqual (T_2, 0x02))
                                 {
                                     Return (And (PR3, 0x04))
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_2, 0x03))
+                                    If (LEqual (T_2, 0x03))
                                     {
                                         Return (And (PR3, 0x08))
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_2, 0x04))
+                                        If (LEqual (T_2, 0x04))
                                         {
                                             Return (And (PR3, 0x10))
                                         }
                                         Else
                                         {
-                                            If (LEqual (_T_2, 0x05))
+                                            If (LEqual (T_2, 0x05))
                                             {
                                                 Return (And (PR3, 0x20))
                                             }
@@ -4576,7 +4437,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             {
                 If (LEqual (DVID, 0xFFFF))
                 {
-                    Return (Zero)
+                    
                 }
 
                 Store (MEMB, Local2)
@@ -4712,6 +4573,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 And (PDBM, 0xFFFFFFFFFFFFFFFD, PDBM)
                 Store (Local2, MEMB)
                 Store (Local1, PDBM)
+                Return (Zero)
             }
 
             Method (_PS3, 0, Serialized)  // _PS3: Power State 3
@@ -4773,6 +4635,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Store (0x03, D0D3)
                 Store (Local2, MEMB)
                 Store (Local1, PDBM)
+                Return (Zero)
             }
 
             Method (CUID, 1, Serialized)
@@ -4871,13 +4734,14 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 {
                     If (LEqual (DVID, 0xFFFF))
                     {
-                        Return (Zero)
+                        
                     }
 
                     If (CondRefOf (\_SB.PCI0.XHC.RHUB.PS0X))
                     {
                         PS0X ()
                     }
+                    Return (Zero)
                 }
 
                 Method (_PS2, 0, Serialized)  // _PS2: Power State 2
@@ -6444,11 +6308,11 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         {
             Method (_HID, 0, Serialized)  // _HID: Hardware ID
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 While (One)
                 {
-                    Store (SHTP, _T_0)
-                    If (LEqual (_T_0, 0x03))
+                    Store (SHTP, T_0)
+                    If (LEqual (T_0, 0x03))
                     {
                         Return ("SMO91D0")
                     }
@@ -6464,11 +6328,11 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             Name (_UID, One)  // _UID: Unique ID
             Method (_STA, 0, Serialized)  // _STA: Status
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 While (One)
                 {
-                    Store (SHTP, _T_0)
-                    If (LEqual (_T_0, 0x03))
+                    Store (SHTP, T_0)
+                    If (LEqual (T_0, 0x03))
                     {
                         If (LEqual (_HID (), "SMO91D0"))
                         {
@@ -6477,7 +6341,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x02))
+                        If (LEqual (T_0, 0x02))
                         {
                             If (LAnd (LEqual (RDGP (0x2C), One), LEqual (_HID (), "INT33D1")))
                             {
@@ -6497,34 +6361,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Return (Zero)
             }
 
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (One)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
 
             Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
             {
@@ -6609,11 +6446,11 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             Name (_UID, One)  // _UID: Unique ID
             Method (_STA, 0, Serialized)  // _STA: Status
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 While (One)
                 {
-                    Store (SHTP, _T_0)
-                    If (LEqual (_T_0, 0x03))
+                    Store (SHTP, T_0)
+                    If (LEqual (T_0, 0x03))
                     {
                         If (LEqual (_HID, "SMO91D0"))
                         {
@@ -6622,7 +6459,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x02))
+                        If (LEqual (T_0, 0x02))
                         {
                             If (LAnd (LEqual (RDGP (0x2C), One), LEqual (_HID, "INT33D1")))
                             {
@@ -6642,34 +6479,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Return (Zero)
             }
 
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (One)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
 
             Method (_CRS, 0, NotSerialized)  // _CRS: Current Resource Settings
             {
@@ -6753,34 +6563,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             Name (_HID, "MSFT1111")  // _HID: Hardware ID
             Name (_CID, "PNP0C50")  // _CID: Compatible ID
             Name (_UID, One)  // _UID: Unique ID
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (One)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
 
             Method (_STA, 0, NotSerialized)  // _STA: Status
             {
@@ -6856,32 +6639,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
             Name (_CID, "PNP0C50")  // _CID: Compatible ID
             Name (_S0W, 0x03)  // _S0W: S0 Device Wake State
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (0x20)
-                    }
-                }
-
-                Return (Buffer (One)
-                {
-                     0x00                                           
-                })
-            }
+            
 
             Method (_STA, 0, NotSerialized)  // _STA: Status
             {
@@ -6920,41 +6678,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             Name (_CID, "PNP0C50")  // _CID: Compatible ID
             Name (_UID, One)  // _UID: Unique ID
             Name (_S0W, 0x04)  // _S0W: S0 Device Wake State
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                        Else
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x00                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (Zero)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
 
             Method (_STA, 0, NotSerialized)  // _STA: Status
             {
@@ -7032,41 +6756,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             Name (_CID, "PNP0C50")  // _CID: Compatible ID
             Name (_UID, One)  // _UID: Unique ID
             Name (_S0W, 0x04)  // _S0W: S0 Device Wake State
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                        Else
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x00                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (One)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
 
             Method (_STA, 0, NotSerialized)  // _STA: Status
             {
@@ -7111,41 +6801,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             Name (_CID, "PNP0C50")  // _CID: Compatible ID
             Name (_UID, One)  // _UID: Unique ID
             Name (_S0W, 0x04)  // _S0W: S0 Device Wake State
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                        Else
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x00                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (One)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
 
             Method (_STA, 0, NotSerialized)  // _STA: Status
             {
@@ -7210,41 +6866,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             Name (_CID, "PNP0C50")  // _CID: Compatible ID
             Name (_UID, One)  // _UID: Unique ID
             Name (_S0W, 0x04)  // _S0W: S0 Device Wake State
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                        Else
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x00                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (0x0F)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
 
             Method (_STA, 0, NotSerialized)  // _STA: Status
             {
@@ -7293,41 +6915,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             Name (_CID, "PNP0C50")  // _CID: Compatible ID
             Name (_UID, One)  // _UID: Unique ID
             Name (_S0W, 0x04)  // _S0W: S0 Device Wake State
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                        Else
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x00                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (One)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
 
             Method (_STA, 0, NotSerialized)  // _STA: Status
             {
@@ -7377,41 +6965,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             Name (_CID, "PNP0C50")  // _CID: Compatible ID
             Name (_UID, One)  // _UID: Unique ID
             Name (_S0W, 0x04)  // _S0W: S0 Device Wake State
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                        Else
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x00                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (0x20)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
 
             Method (_STA, 0, NotSerialized)  // _STA: Status
             {
@@ -7461,41 +7015,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             Name (_CID, "PNP0C50")  // _CID: Compatible ID
             Name (_UID, One)  // _UID: Unique ID
             Name (_S0W, 0x04)  // _S0W: S0 Device Wake State
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                        Else
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x00                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (One)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
 
             Method (_STA, 0, NotSerialized)  // _STA: Status
             {
@@ -7545,41 +7065,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             Name (_CID, "PNP0C50")  // _CID: Compatible ID
             Name (_UID, One)  // _UID: Unique ID
             Name (_S0W, 0x04)  // _S0W: S0 Device Wake State
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                        Else
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x00                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (One)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
 
             Method (_STA, 0, NotSerialized)  // _STA: Status
             {
@@ -7641,41 +7127,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 }
             }
 
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                        Else
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x00                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (One)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
 
             Method (_STA, 0, NotSerialized)  // _STA: Status
             {
@@ -7790,32 +7242,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Return (Zero)
             }
 
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If (LEqual (Arg0, ToUUID ("3cdff6f7-4267-4555-ad05-b30a3d8938de") /* HID I2C Device */))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, One))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Return (0x20)
-                    }
-                }
-
-                Return (Buffer (One)
-                {
-                     0x00                                           
-                })
-            }
+            
 
             Method (_STA, 0, NotSerialized)  // _STA: Status
             {
@@ -8345,11 +7772,23 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     Store (One, PMES)
                     Notify (HDEF, 0x02)
                 }
+                Return (Zero)
             }
 
             Method (_PRW, 0, NotSerialized)  // _PRW: Power Resources for Wake
             {
                 Return (GPRW (0x6D, 0x04))
+            }
+            Method (_DSM, 4, NotSerialized)
+            {
+                If (LEqual (Arg2, Zero)) { Return (Buffer() { 0x03 } ) }
+                Return (Package()
+                {
+                    "layout-id", Buffer() { 12, 0x00, 0x00, 0x00 },
+                    "hda-gfx", Buffer() { "onboard-1" },
+                    "PinConfigurations", Buffer() { },
+                    //"MaximumBootBeepVolume", 77,
+                })
             }
         }
 
@@ -8611,116 +8050,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Zero
             })
             Name (OPTS, Zero)
-            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-            {
-                Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                While (One)
-                {
-                    Store (ToInteger (Arg0), _T_0)
-                    If (LEqual (_T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
-                    {
-                        While (One)
-                        {
-                            Store (ToInteger (Arg2), _T_1)
-                            If (LEqual (_T_1, Zero))
-                            {
-                                If (LEqual (Arg1, 0x02))
-                                {
-                                    Store (One, OPTS)
-                                    If (LTRE)
-                                    {
-                                        Or (OPTS, 0x40, OPTS)
-                                    }
-
-                                    If (OBFF)
-                                    {
-                                        Or (OPTS, 0x10, OPTS)
-                                    }
-
-                                    Return (OPTS)
-                                }
-                                Else
-                                {
-                                    Return (Zero)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x04))
-                                {
-                                    If (LEqual (Arg1, 0x02))
-                                    {
-                                        If (OBFF)
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                    }
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_1, 0x06))
-                                    {
-                                        If (LEqual (Arg1, 0x02))
-                                        {
-                                            If (LTRE)
-                                            {
-                                                If (LOr (LEqual (LMSL, Zero), LEqual (LNSL, Zero)))
-                                                {
-                                                    If (LEqual (PCHS, One))
-                                                    {
-                                                        Store (0x0846, LMSL)
-                                                        Store (0x0846, LNSL)
-                                                    }
-                                                    Else
-                                                    {
-                                                        If (LEqual (PCHS, 0x02))
-                                                        {
-                                                            Store (0x1003, LMSL)
-                                                            Store (0x1003, LNSL)
-                                                        }
-                                                    }
-                                                }
-
-                                                Store (And (ShiftRight (LMSL, 0x0A), 0x07), Index (LTRV, Zero))
-                                                Store (And (LMSL, 0x03FF), Index (LTRV, One))
-                                                Store (And (ShiftRight (LNSL, 0x0A), 0x07), Index (LTRV, 0x02))
-                                                Store (And (LNSL, 0x03FF), Index (LTRV, 0x03))
-                                                Return (LTRV)
-                                            }
-                                            Else
-                                            {
-                                                Return (Zero)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            Break
-                        }
-                    }
-
-                    Break
-                }
-
-                Return (Buffer (One)
-                {
-                     0x00                                           
-                })
-            }
+            
 
             Device (PXSX)
             {
@@ -8848,116 +8178,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Zero
             })
             Name (OPTS, Zero)
-            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-            {
-                Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                While (One)
-                {
-                    Store (ToInteger (Arg0), _T_0)
-                    If (LEqual (_T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
-                    {
-                        While (One)
-                        {
-                            Store (ToInteger (Arg2), _T_1)
-                            If (LEqual (_T_1, Zero))
-                            {
-                                If (LEqual (Arg1, 0x02))
-                                {
-                                    Store (One, OPTS)
-                                    If (LTRE)
-                                    {
-                                        Or (OPTS, 0x40, OPTS)
-                                    }
-
-                                    If (OBFF)
-                                    {
-                                        Or (OPTS, 0x10, OPTS)
-                                    }
-
-                                    Return (OPTS)
-                                }
-                                Else
-                                {
-                                    Return (Zero)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x04))
-                                {
-                                    If (LEqual (Arg1, 0x02))
-                                    {
-                                        If (OBFF)
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                    }
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_1, 0x06))
-                                    {
-                                        If (LEqual (Arg1, 0x02))
-                                        {
-                                            If (LTRE)
-                                            {
-                                                If (LOr (LEqual (LMSL, Zero), LEqual (LNSL, Zero)))
-                                                {
-                                                    If (LEqual (PCHS, One))
-                                                    {
-                                                        Store (0x0846, LMSL)
-                                                        Store (0x0846, LNSL)
-                                                    }
-                                                    Else
-                                                    {
-                                                        If (LEqual (PCHS, 0x02))
-                                                        {
-                                                            Store (0x1003, LMSL)
-                                                            Store (0x1003, LNSL)
-                                                        }
-                                                    }
-                                                }
-
-                                                Store (And (ShiftRight (LMSL, 0x0A), 0x07), Index (LTRV, Zero))
-                                                Store (And (LMSL, 0x03FF), Index (LTRV, One))
-                                                Store (And (ShiftRight (LNSL, 0x0A), 0x07), Index (LTRV, 0x02))
-                                                Store (And (LNSL, 0x03FF), Index (LTRV, 0x03))
-                                                Return (LTRV)
-                                            }
-                                            Else
-                                            {
-                                                Return (Zero)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            Break
-                        }
-                    }
-
-                    Break
-                }
-
-                Return (Buffer (One)
-                {
-                     0x00                                           
-                })
-            }
+            
 
             Device (PXSX)
             {
@@ -9097,116 +8318,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Zero
             })
             Name (OPTS, Zero)
-            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-            {
-                Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                While (One)
-                {
-                    Store (ToInteger (Arg0), _T_0)
-                    If (LEqual (_T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
-                    {
-                        While (One)
-                        {
-                            Store (ToInteger (Arg2), _T_1)
-                            If (LEqual (_T_1, Zero))
-                            {
-                                If (LEqual (Arg1, 0x02))
-                                {
-                                    Store (One, OPTS)
-                                    If (LTRE)
-                                    {
-                                        Or (OPTS, 0x40, OPTS)
-                                    }
-
-                                    If (OBFF)
-                                    {
-                                        Or (OPTS, 0x10, OPTS)
-                                    }
-
-                                    Return (OPTS)
-                                }
-                                Else
-                                {
-                                    Return (Zero)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x04))
-                                {
-                                    If (LEqual (Arg1, 0x02))
-                                    {
-                                        If (OBFF)
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                    }
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_1, 0x06))
-                                    {
-                                        If (LEqual (Arg1, 0x02))
-                                        {
-                                            If (LTRE)
-                                            {
-                                                If (LOr (LEqual (LMSL, Zero), LEqual (LNSL, Zero)))
-                                                {
-                                                    If (LEqual (PCHS, One))
-                                                    {
-                                                        Store (0x0846, LMSL)
-                                                        Store (0x0846, LNSL)
-                                                    }
-                                                    Else
-                                                    {
-                                                        If (LEqual (PCHS, 0x02))
-                                                        {
-                                                            Store (0x1003, LMSL)
-                                                            Store (0x1003, LNSL)
-                                                        }
-                                                    }
-                                                }
-
-                                                Store (And (ShiftRight (LMSL, 0x0A), 0x07), Index (LTRV, Zero))
-                                                Store (And (LMSL, 0x03FF), Index (LTRV, One))
-                                                Store (And (ShiftRight (LNSL, 0x0A), 0x07), Index (LTRV, 0x02))
-                                                Store (And (LNSL, 0x03FF), Index (LTRV, 0x03))
-                                                Return (LTRV)
-                                            }
-                                            Else
-                                            {
-                                                Return (Zero)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            Break
-                        }
-                    }
-
-                    Break
-                }
-
-                Return (Buffer (One)
-                {
-                     0x00                                           
-                })
-            }
+            
 
             Device (PXSX)
             {
@@ -9334,116 +8446,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Zero
             })
             Name (OPTS, Zero)
-            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-            {
-                Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                While (One)
-                {
-                    Store (ToInteger (Arg0), _T_0)
-                    If (LEqual (_T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
-                    {
-                        While (One)
-                        {
-                            Store (ToInteger (Arg2), _T_1)
-                            If (LEqual (_T_1, Zero))
-                            {
-                                If (LEqual (Arg1, 0x02))
-                                {
-                                    Store (One, OPTS)
-                                    If (LTRE)
-                                    {
-                                        Or (OPTS, 0x40, OPTS)
-                                    }
-
-                                    If (OBFF)
-                                    {
-                                        Or (OPTS, 0x10, OPTS)
-                                    }
-
-                                    Return (OPTS)
-                                }
-                                Else
-                                {
-                                    Return (Zero)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x04))
-                                {
-                                    If (LEqual (Arg1, 0x02))
-                                    {
-                                        If (OBFF)
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                    }
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_1, 0x06))
-                                    {
-                                        If (LEqual (Arg1, 0x02))
-                                        {
-                                            If (LTRE)
-                                            {
-                                                If (LOr (LEqual (LMSL, Zero), LEqual (LNSL, Zero)))
-                                                {
-                                                    If (LEqual (PCHS, One))
-                                                    {
-                                                        Store (0x0846, LMSL)
-                                                        Store (0x0846, LNSL)
-                                                    }
-                                                    Else
-                                                    {
-                                                        If (LEqual (PCHS, 0x02))
-                                                        {
-                                                            Store (0x1003, LMSL)
-                                                            Store (0x1003, LNSL)
-                                                        }
-                                                    }
-                                                }
-
-                                                Store (And (ShiftRight (LMSL, 0x0A), 0x07), Index (LTRV, Zero))
-                                                Store (And (LMSL, 0x03FF), Index (LTRV, One))
-                                                Store (And (ShiftRight (LNSL, 0x0A), 0x07), Index (LTRV, 0x02))
-                                                Store (And (LNSL, 0x03FF), Index (LTRV, 0x03))
-                                                Return (LTRV)
-                                            }
-                                            Else
-                                            {
-                                                Return (Zero)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            Break
-                        }
-                    }
-
-                    Break
-                }
-
-                Return (Buffer (One)
-                {
-                     0x00                                           
-                })
-            }
+            
 
             Device (PXSX)
             {
@@ -9583,116 +8586,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Zero
             })
             Name (OPTS, Zero)
-            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-            {
-                Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                While (One)
-                {
-                    Store (ToInteger (Arg0), _T_0)
-                    If (LEqual (_T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
-                    {
-                        While (One)
-                        {
-                            Store (ToInteger (Arg2), _T_1)
-                            If (LEqual (_T_1, Zero))
-                            {
-                                If (LEqual (Arg1, 0x02))
-                                {
-                                    Store (One, OPTS)
-                                    If (LTRE)
-                                    {
-                                        Or (OPTS, 0x40, OPTS)
-                                    }
-
-                                    If (OBFF)
-                                    {
-                                        Or (OPTS, 0x10, OPTS)
-                                    }
-
-                                    Return (OPTS)
-                                }
-                                Else
-                                {
-                                    Return (Zero)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x04))
-                                {
-                                    If (LEqual (Arg1, 0x02))
-                                    {
-                                        If (OBFF)
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                    }
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_1, 0x06))
-                                    {
-                                        If (LEqual (Arg1, 0x02))
-                                        {
-                                            If (LTRE)
-                                            {
-                                                If (LOr (LEqual (LMSL, Zero), LEqual (LNSL, Zero)))
-                                                {
-                                                    If (LEqual (PCHS, One))
-                                                    {
-                                                        Store (0x0846, LMSL)
-                                                        Store (0x0846, LNSL)
-                                                    }
-                                                    Else
-                                                    {
-                                                        If (LEqual (PCHS, 0x02))
-                                                        {
-                                                            Store (0x1003, LMSL)
-                                                            Store (0x1003, LNSL)
-                                                        }
-                                                    }
-                                                }
-
-                                                Store (And (ShiftRight (LMSL, 0x0A), 0x07), Index (LTRV, Zero))
-                                                Store (And (LMSL, 0x03FF), Index (LTRV, One))
-                                                Store (And (ShiftRight (LNSL, 0x0A), 0x07), Index (LTRV, 0x02))
-                                                Store (And (LNSL, 0x03FF), Index (LTRV, 0x03))
-                                                Return (LTRV)
-                                            }
-                                            Else
-                                            {
-                                                Return (Zero)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            Break
-                        }
-                    }
-
-                    Break
-                }
-
-                Return (Buffer (One)
-                {
-                     0x00                                           
-                })
-            }
+            
 
             Device (PXSX)
             {
@@ -9827,116 +8721,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Zero
             })
             Name (OPTS, Zero)
-            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-            {
-                Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                While (One)
-                {
-                    Store (ToInteger (Arg0), _T_0)
-                    If (LEqual (_T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
-                    {
-                        While (One)
-                        {
-                            Store (ToInteger (Arg2), _T_1)
-                            If (LEqual (_T_1, Zero))
-                            {
-                                If (LEqual (Arg1, 0x02))
-                                {
-                                    Store (One, OPTS)
-                                    If (LTRE)
-                                    {
-                                        Or (OPTS, 0x40, OPTS)
-                                    }
-
-                                    If (OBFF)
-                                    {
-                                        Or (OPTS, 0x10, OPTS)
-                                    }
-
-                                    Return (OPTS)
-                                }
-                                Else
-                                {
-                                    Return (Zero)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x04))
-                                {
-                                    If (LEqual (Arg1, 0x02))
-                                    {
-                                        If (OBFF)
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                    }
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_1, 0x06))
-                                    {
-                                        If (LEqual (Arg1, 0x02))
-                                        {
-                                            If (LTRE)
-                                            {
-                                                If (LOr (LEqual (LMSL, Zero), LEqual (LNSL, Zero)))
-                                                {
-                                                    If (LEqual (PCHS, One))
-                                                    {
-                                                        Store (0x0846, LMSL)
-                                                        Store (0x0846, LNSL)
-                                                    }
-                                                    Else
-                                                    {
-                                                        If (LEqual (PCHS, 0x02))
-                                                        {
-                                                            Store (0x1003, LMSL)
-                                                            Store (0x1003, LNSL)
-                                                        }
-                                                    }
-                                                }
-
-                                                Store (And (ShiftRight (LMSL, 0x0A), 0x07), Index (LTRV, Zero))
-                                                Store (And (LMSL, 0x03FF), Index (LTRV, One))
-                                                Store (And (ShiftRight (LNSL, 0x0A), 0x07), Index (LTRV, 0x02))
-                                                Store (And (LNSL, 0x03FF), Index (LTRV, 0x03))
-                                                Return (LTRV)
-                                            }
-                                            Else
-                                            {
-                                                Return (Zero)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            Break
-                        }
-                    }
-
-                    Break
-                }
-
-                Return (Buffer (One)
-                {
-                     0x00                                           
-                })
-            }
+            
 
             Device (PXSX)
             {
@@ -10076,116 +8861,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Zero
             })
             Name (OPTS, Zero)
-            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-            {
-                Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                While (One)
-                {
-                    Store (ToInteger (Arg0), _T_0)
-                    If (LEqual (_T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
-                    {
-                        While (One)
-                        {
-                            Store (ToInteger (Arg2), _T_1)
-                            If (LEqual (_T_1, Zero))
-                            {
-                                If (LEqual (Arg1, 0x02))
-                                {
-                                    Store (One, OPTS)
-                                    If (LTRE)
-                                    {
-                                        Or (OPTS, 0x40, OPTS)
-                                    }
-
-                                    If (OBFF)
-                                    {
-                                        Or (OPTS, 0x10, OPTS)
-                                    }
-
-                                    Return (OPTS)
-                                }
-                                Else
-                                {
-                                    Return (Zero)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x04))
-                                {
-                                    If (LEqual (Arg1, 0x02))
-                                    {
-                                        If (OBFF)
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                    }
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_1, 0x06))
-                                    {
-                                        If (LEqual (Arg1, 0x02))
-                                        {
-                                            If (LTRE)
-                                            {
-                                                If (LOr (LEqual (LMSL, Zero), LEqual (LNSL, Zero)))
-                                                {
-                                                    If (LEqual (PCHS, One))
-                                                    {
-                                                        Store (0x0846, LMSL)
-                                                        Store (0x0846, LNSL)
-                                                    }
-                                                    Else
-                                                    {
-                                                        If (LEqual (PCHS, 0x02))
-                                                        {
-                                                            Store (0x1003, LMSL)
-                                                            Store (0x1003, LNSL)
-                                                        }
-                                                    }
-                                                }
-
-                                                Store (And (ShiftRight (LMSL, 0x0A), 0x07), Index (LTRV, Zero))
-                                                Store (And (LMSL, 0x03FF), Index (LTRV, One))
-                                                Store (And (ShiftRight (LNSL, 0x0A), 0x07), Index (LTRV, 0x02))
-                                                Store (And (LNSL, 0x03FF), Index (LTRV, 0x03))
-                                                Return (LTRV)
-                                            }
-                                            Else
-                                            {
-                                                Return (Zero)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            Break
-                        }
-                    }
-
-                    Break
-                }
-
-                Return (Buffer (One)
-                {
-                     0x00                                           
-                })
-            }
+            
 
             Device (PXSX)
             {
@@ -10313,116 +8989,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Zero
             })
             Name (OPTS, Zero)
-            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-            {
-                Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                While (One)
-                {
-                    Store (ToInteger (Arg0), _T_0)
-                    If (LEqual (_T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
-                    {
-                        While (One)
-                        {
-                            Store (ToInteger (Arg2), _T_1)
-                            If (LEqual (_T_1, Zero))
-                            {
-                                If (LEqual (Arg1, 0x02))
-                                {
-                                    Store (One, OPTS)
-                                    If (LTRE)
-                                    {
-                                        Or (OPTS, 0x40, OPTS)
-                                    }
-
-                                    If (OBFF)
-                                    {
-                                        Or (OPTS, 0x10, OPTS)
-                                    }
-
-                                    Return (OPTS)
-                                }
-                                Else
-                                {
-                                    Return (Zero)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x04))
-                                {
-                                    If (LEqual (Arg1, 0x02))
-                                    {
-                                        If (OBFF)
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                        Else
-                                        {
-                                            Return (Buffer (0x10)
-                                            {
-                                                /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                /* 0008 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
-                                            })
-                                        }
-                                    }
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_1, 0x06))
-                                    {
-                                        If (LEqual (Arg1, 0x02))
-                                        {
-                                            If (LTRE)
-                                            {
-                                                If (LOr (LEqual (LMSL, Zero), LEqual (LNSL, Zero)))
-                                                {
-                                                    If (LEqual (PCHS, One))
-                                                    {
-                                                        Store (0x0846, LMSL)
-                                                        Store (0x0846, LNSL)
-                                                    }
-                                                    Else
-                                                    {
-                                                        If (LEqual (PCHS, 0x02))
-                                                        {
-                                                            Store (0x1003, LMSL)
-                                                            Store (0x1003, LNSL)
-                                                        }
-                                                    }
-                                                }
-
-                                                Store (And (ShiftRight (LMSL, 0x0A), 0x07), Index (LTRV, Zero))
-                                                Store (And (LMSL, 0x03FF), Index (LTRV, One))
-                                                Store (And (ShiftRight (LNSL, 0x0A), 0x07), Index (LTRV, 0x02))
-                                                Store (And (LNSL, 0x03FF), Index (LTRV, 0x03))
-                                                Return (LTRV)
-                                            }
-                                            Else
-                                            {
-                                                Return (Zero)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            Break
-                        }
-                    }
-
-                    Break
-                }
-
-                Return (Buffer (One)
-                {
-                     0x00                                           
-                })
-            }
+            
 
             Device (PXSX)
             {
@@ -10471,7 +9038,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             }
         }
 
-        Device (SAT0)
+        Device (SATA)
         {
             Name (_ADR, 0x001F0002)  // _ADR: Address
             Name (PRBI, Zero)
@@ -10547,6 +9114,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                         }
                     }
                 }
+                Return (Zero)
             }
 
             Method (RPD0, 0, Serialized)
@@ -10614,6 +9182,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 }
 
                 RDCA (Zero, Add (PCLP, 0x10), 0xFFFFFFFC, And (PEPL, 0x03), 0x03)
+                Return (Zero)
             }
 
             Device (NVM0)
@@ -10623,7 +9192,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 {
                     If (LEqual (PCIT, Zero))
                     {
-                        Return (Zero)
+                        
                     }
 
                     Store (RDCA (Zero, 0x04, Zero, Zero, 0x02), PCMD)
@@ -10643,13 +9212,14 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                     EPD3 ()
                     RPD3 ()
+                    Return (Zero)
                 }
 
                 Method (_PS0, 0, Serialized)  // _PS0: Power State 0
                 {
                     If (LEqual (PCIT, Zero))
                     {
-                        Return (Zero)
+                        
                     }
 
                     RPD0 ()
@@ -10659,14 +9229,24 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     {
                         CNRS ()
                     }
+                    Return (Zero)
                 }
+            }
+            Method (_DSM, 4, NotSerialized)
+            {
+                Store (Package (0x0A) {
+                    "AAPL,slot-name", "Built In",
+                    "name", "Intel AHCI Controller",
+                    "model", Buffer (0x2D) {"Intel 9 Series Chipset Family SATA Controller"},
+                    "device_type", Buffer (0x0F) {"AHCI Controller"},
+                    "device-id", Buffer (0x04) {0x02,0x1E,0x00,0x00}
+                }, Local0)
+                DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))
+                Return (Local0)
             }
         }
 
-        Device (SAT1)
-        {
-            Name (_ADR, 0x001F0005)  // _ADR: Address
-        }
+        
 
         Device (SBUS)
         {
@@ -11003,6 +9583,23 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Or (HCON, 0x02, HCON)
                 Or (HSTS, 0xFF, HSTS)
             }
+            Device (BUS0)
+            {
+                Name (_CID, "smbus")
+                Name (_ADR, Zero)
+                Device (DVL0)
+                {
+                    Name (_ADR, 0x57)
+                    Name (_CID, "diagsvault")
+                    Method (_DSM, 4, NotSerialized)
+                    {
+                        Store (Package (0x02) {
+                            "address", 0x57			}, Local0)
+                        DTGP (Arg0, Arg1, Arg2, Arg3, RefOf (Local0))
+                        Return (Local0)
+                    }
+                }
+            }
         }
     }
 
@@ -11058,44 +9655,22 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         {
             Name (_HID, EisaId ("PNP0103"))  // _HID: Hardware ID
             Name (_UID, Zero)  // _UID: Unique ID
-            Name (BUF0, ResourceTemplate ()
-            {
+            Name (BUF0, ResourceTemplate()
+{
+    IRQNoFlags() { 0, 8, 11, 15 }
+
                 Memory32Fixed (ReadWrite,
                     0xFED00000,         // Address Base
                     0x00000400,         // Address Length
                     _Y2B)
             })
-            Method (_STA, 0, NotSerialized)  // _STA: Status
+
+            
+
+            
+            Name (_STA, 0x0F)
+            Method (_CRS, 0, NotSerialized)
             {
-                If (HPAE)
-                {
-                    Return (0x0F)
-                }
-
-                Return (Zero)
-            }
-
-            Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
-            {
-                If (HPAE)
-                {
-                    CreateDWordField (BUF0, \_SB.PCI0.LPCB.HPET._Y2B._BAS, HPT0)  // _BAS: Base Address
-                    If (LEqual (HPAS, One))
-                    {
-                        Store (0xFED01000, HPT0)
-                    }
-
-                    If (LEqual (HPAS, 0x02))
-                    {
-                        Store (0xFED02000, HPT0)
-                    }
-
-                    If (LEqual (HPAS, 0x03))
-                    {
-                        Store (0xFED03000, HPT0)
-                    }
-                }
-
                 Return (BUF0)
             }
         }
@@ -11207,8 +9782,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     0x01,               // Alignment
                     0x02,               // Length
                     )
-                IRQNoFlags ()
-                    {2}
+                
             })
         }
 
@@ -11397,10 +9971,9 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     0x0070,             // Range Minimum
                     0x0070,             // Range Maximum
                     0x01,               // Alignment
-                    0x08,               // Length
+                    0x02,               // Length
                     )
-                IRQNoFlags ()
-                    {8}
+                
             })
         }
 
@@ -11421,8 +9994,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     0x10,               // Alignment
                     0x04,               // Length
                     )
-                IRQNoFlags ()
-                    {0}
+                
             })
         }
 
@@ -11645,11 +10217,11 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
             Method (_STA, 0, Serialized)  // _STA: Status
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 While (One)
                 {
-                    Store (BID, _T_0)
-                    If (LEqual (_T_0, 0x30))
+                    Store (BID, T_0)
+                    If (LEqual (T_0, 0x30))
                     {
                         Return (Zero)
                     }
@@ -11671,103 +10243,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Return (Zero)
             }
 
-            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-            {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                If (LEqual (Arg0, ToUUID ("5630831c-06c9-4856-b327-f5d32586e060")))
-                {
-                    If (LEqual (Zero, ToInteger (Arg1)))
-                    {
-                        While (One)
-                        {
-                            Store (ToInteger (Arg2), _T_0)
-                            If (LEqual (_T_0, Zero))
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x07                                           
-                                })
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_0, One))
-                                {
-                                    Store (DerefOf (Index (Arg3, Zero)), Local0)
-                                    If (LEqual (Local0, One))
-                                    {
-                                        If (LEqual (PCHS, One))
-                                        {
-                                            If (LEqual (BID, 0x43))
-                                            {
-                                                Or (GL08, 0x04, GL08)
-                                            }
-                                            Else
-                                            {
-                                                Or (GL08, 0x40, GL08)
-                                            }
-                                        }
-                                        Else
-                                        {
-                                            \_SB.WTGP (DFUP, One)
-                                        }
-                                    }
-                                    Else
-                                    {
-                                        If (LEqual (PCHS, One))
-                                        {
-                                            If (LEqual (BID, 0x43))
-                                            {
-                                                And (GL08, 0xFB, GL08)
-                                            }
-                                            Else
-                                            {
-                                                And (GL08, 0xBF, GL08)
-                                            }
-                                        }
-                                        Else
-                                        {
-                                            \_SB.WTGP (DFUP, Zero)
-                                        }
-                                    }
-
-                                    Return (One)
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x02))
-                                    {
-                                        If (LEqual (PCHS, One))
-                                        {
-                                            If (LEqual (BID, 0x43))
-                                            {
-                                                Store (ShiftRight (And (GL08, 0x04), 0x02), Local0)
-                                            }
-                                            Else
-                                            {
-                                                Store (ShiftRight (And (GL08, 0x40), 0x06), Local0)
-                                            }
-                                        }
-                                        Else
-                                        {
-                                            Store (\_SB.RDGP (DFUP), Local0)
-                                        }
-
-                                        Return (Local0)
-                                    }
-                                }
-                            }
-
-                            Break
-                        }
-
-                        Return (Zero)
-                    }
-
-                    Return (Zero)
-                }
-
-                Return (Zero)
-            }
+            
         }
     }
 
@@ -12124,7 +10600,8 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
     Method (_WAK, 1, Serialized)  // _WAK: Wake
     {
-        P8XH (One, 0xAB)
+        If (LOr(LLess(Arg0,1),LGreater(Arg0,5))) { Store(3,Arg0) }
+P8XH (One, 0xAB)
         If (LEqual (Arg0, One))
         {
             H2OP (0xE1)
@@ -12157,10 +10634,10 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             }
         }
 
-        If (LAnd (LNotEqual (And (\_SB.PCI0.B0D3.ABAR, 0xFFFFC004), 0xFFFFC004), LNotEqual (And (
-            \_SB.PCI0.B0D3.ABAR, 0xFFFFC000), Zero)))
+        If (LAnd (LNotEqual (And (\_SB.PCI0.HDAU.ABAR, 0xFFFFC004), 0xFFFFC004), LNotEqual (And (
+            \_SB.PCI0.HDAU.ABAR, 0xFFFFC000), Zero)))
         {
-            Store (\_SB.PCI0.B0D3.ABAR, \_SB.PCI0.B0D3.BARA)
+            Store (\_SB.PCI0.HDAU.ABAR, \_SB.PCI0.HDAU.BARA)
         }
 
         If (And (ICNF, 0x10))
@@ -12168,16 +10645,16 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             ADBG ("ISCT debug")
             ADBG (Concatenate ("WKRS = ", ToHexString (\_SB.IAOE.WKRS)))
             ADBG (Concatenate ("IBT1 = ", ToHexString (\_SB.IAOE.IBT1)))
-            If (And (\_SB.PCI0.GFX0.TCHE, 0x0100))
+            If (And (\_SB.PCI0.IGPU.TCHE, 0x0100))
             {
                 If (LAnd (And (\_SB.IAOE.IBT1, One), And (\_SB.IAOE.WKRS, 0x10)))
                 {
-                    Store (Or (And (\_SB.PCI0.GFX0.STAT, 0xFFFFFFFFFFFFFFFC), One), \_SB.PCI0.GFX0.STAT)
+                    Store (Or (And (\_SB.PCI0.IGPU.STAT, 0xFFFFFFFFFFFFFFFC), One), \_SB.PCI0.IGPU.STAT)
                     ADBG ("Turning off Gfx")
                 }
                 Else
                 {
-                    Store (And (\_SB.PCI0.GFX0.STAT, 0xFFFFFFFFFFFFFFFC), \_SB.PCI0.GFX0.STAT)
+                    Store (And (\_SB.PCI0.IGPU.STAT, 0xFFFFFFFFFFFFFFFC), \_SB.PCI0.IGPU.STAT)
                     ADBG ("Keeping Gfx on")
                 }
             }
@@ -12225,9 +10702,9 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Store (\_SB.PCI0.LPCB.EC0.LIDF, Local0)
                 Not (Local0, Local0)
                 Add (Local0, 0x02)
-                If (\_SB.PCI0.GFX0.GLID (Local0))
+                If (\_SB.PCI0.IGPU.GLID (Local0))
                 {
-                    Or (0x80000000, \_SB.PCI0.GFX0.CLID, \_SB.PCI0.GFX0.CLID)
+                    Or (0x80000000, \_SB.PCI0.IGPU.CLID, \_SB.PCI0.IGPU.CLID)
                 }
 
                 Notify (\_SB.PCI0.LPCB.LID0, 0x80)
@@ -12295,7 +10772,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             If (And (PB1E, 0x20)) {}
             Else
             {
-                \_SB.PCI0.GFX0.IUEH (0x06)
+                \_SB.PCI0.IGPU.IUEH (0x06)
             }
         }
 
@@ -12341,106 +10818,9 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
     Method (PNOT, 0, Serialized)
     {
-        If (CondRefOf (\_SB.PCCD.PENB))
-        {
-            Notify (\_SB.PCCD, 0x82)
-        }
-        Else
-        {
-            If (LGreater (TCNT, One))
-            {
-                If (And (PDC0, 0x08))
-                {
-                    Notify (\_PR.CPU0, 0x80)
-                }
+        
+        // nothing
 
-                If (And (PDC1, 0x08))
-                {
-                    Notify (\_PR.CPU1, 0x80)
-                }
-
-                If (And (PDC2, 0x08))
-                {
-                    Notify (\_PR.CPU2, 0x80)
-                }
-
-                If (And (PDC3, 0x08))
-                {
-                    Notify (\_PR.CPU3, 0x80)
-                }
-
-                If (And (PDC4, 0x08))
-                {
-                    Notify (\_PR.CPU4, 0x80)
-                }
-
-                If (And (PDC5, 0x08))
-                {
-                    Notify (\_PR.CPU5, 0x80)
-                }
-
-                If (And (PDC6, 0x08))
-                {
-                    Notify (\_PR.CPU6, 0x80)
-                }
-
-                If (And (PDC7, 0x08))
-                {
-                    Notify (\_PR.CPU7, 0x80)
-                }
-            }
-            Else
-            {
-                Notify (\_PR.CPU0, 0x80)
-            }
-        }
-
-        If (LGreater (TCNT, One))
-        {
-            If (LAnd (And (PDC0, 0x08), And (PDC0, 0x10)))
-            {
-                Notify (\_PR.CPU0, 0x81)
-            }
-
-            If (LAnd (And (PDC1, 0x08), And (PDC1, 0x10)))
-            {
-                Notify (\_PR.CPU1, 0x81)
-            }
-
-            If (LAnd (And (PDC2, 0x08), And (PDC2, 0x10)))
-            {
-                Notify (\_PR.CPU2, 0x81)
-            }
-
-            If (LAnd (And (PDC3, 0x08), And (PDC3, 0x10)))
-            {
-                Notify (\_PR.CPU3, 0x81)
-            }
-
-            If (LAnd (And (PDC4, 0x08), And (PDC4, 0x10)))
-            {
-                Notify (\_PR.CPU4, 0x81)
-            }
-
-            If (LAnd (And (PDC5, 0x08), And (PDC5, 0x10)))
-            {
-                Notify (\_PR.CPU5, 0x81)
-            }
-
-            If (LAnd (And (PDC6, 0x08), And (PDC6, 0x10)))
-            {
-                Notify (\_PR.CPU6, 0x81)
-            }
-
-            If (LAnd (And (PDC7, 0x08), And (PDC7, 0x10)))
-            {
-                Notify (\_PR.CPU7, 0x81)
-            }
-        }
-        Else
-        {
-            Notify (\_PR.CPU0, 0x81)
-        }
     }
 
     OperationRegion (MBAR, SystemMemory, Add (\_SB.PCI0.GMHB (), 0x5000), 0x1000)
@@ -12484,6 +10864,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         Store (Local1, PPL1)
         Store (One, PL1E)
         Store (One, CLP1)
+        Return (Zero)
     }
 
     Method (RPL1, 0, Serialized)
@@ -13006,7 +11387,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
     {
         If (LEqual (And (DIDX, 0x0F00), 0x0400))
         {
-            Notify (\_SB.PCI0.GFX0.DD1F, Arg0)
+            Notify (\_SB.PCI0.IGPU.DD1F, Arg0)
         }
     }
 
@@ -13341,9 +11722,9 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
         Method (_L66, 0, NotSerialized)  // _Lxx: Level-Triggered GPE
         {
-            If (LAnd (\_SB.PCI0.GFX0.GSSE, LNot (GSMI)))
+            If (LAnd (\_SB.PCI0.IGPU.GSSE, LNot (GSMI)))
             {
-                \_SB.PCI0.GFX0.GSCI ()
+                \_SB.PCI0.IGPU.GSCI ()
             }
         }
 
@@ -13358,7 +11739,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             {
                 ADBG ("Rotation Lock")
                 Sleep (0x03E8)
-                \_SB.PCI0.GFX0.IUEH (0x04)
+                \_SB.PCI0.IGPU.IUEH (0x04)
             }
         }
     }
@@ -13376,13 +11757,13 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
         Method (_INI, 0, Serialized)  // _INI: Initialize
         {
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             Store (ADBT, ABTH)
             Store (ADFM, FMSK)
             While (One)
             {
-                Store (ToInteger (CODS), _T_0)
-                If (LEqual (_T_0, Zero))
+                Store (ToInteger (CODS), T_0)
+                If (LEqual (T_0, Zero))
                 {
                     ^^I2C0.ACD0._INI ()
                     Store (^^I2C0.ACD0.MCLK, MCLK)
@@ -13392,7 +11773,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 }
                 Else
                 {
-                    If (LEqual (_T_0, One))
+                    If (LEqual (T_0, One))
                     {
                         ^^I2C0.ACD0._INI ()
                         Store (^^I2C0.ACD0.MCLK, MCLK)
@@ -13402,7 +11783,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x02))
+                        If (LEqual (T_0, 0x02))
                         {
                             ^^I2C0.ACD1._INI ()
                             Store (^^I2C0.ACD1.MCLK, MCLK)
@@ -13412,7 +11793,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x03))
+                            If (LEqual (T_0, 0x03))
                             {
                                 ^^I2C0.ACD2._INI ()
                                 Store (^^I2C0.ACD2.MCLK, MCLK)
@@ -13422,7 +11803,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x04))
+                                If (LEqual (T_0, 0x04))
                                 {
                                     ^^I2C0.ACD2._INI ()
                                     Store (^^I2C0.ACD2.MCLK, MCLK)
@@ -13432,7 +11813,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x05))
+                                    If (LEqual (T_0, 0x05))
                                     {
                                         ^^I2C0.ACD3._INI ()
                                         Store (^^I2C0.ACD3.MCLK, MCLK)
@@ -13459,125 +11840,10 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             SSPI (Local0)
         }
 
-        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-        {
-            Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-            If (LEqual (Arg0, ToUUID ("1730e71d-e5dd-4a34-be57-4d76b6a2fe37")))
-            {
-                If (LEqual (Arg2, Zero))
-                {
-                    If (LEqual (Arg1, Zero))
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x03                                           
-                        })
-                    }
-                    Else
-                    {
-                        Return (Zero)
-                    }
-                }
-
-                If (LEqual (Arg2, One))
-                {
-                    While (One)
-                    {
-                        Store (DerefOf (Index (Arg3, Zero)), _T_0)
-                        If (LEqual (_T_0, Zero))
-                        {
-                            P8XH (Zero, 0x5C)
-                        }
-                        Else
-                        {
-                            If (LEqual (_T_0, One))
-                            {
-                                If (CondRefOf (\_SB.SLPB))
-                                {
-                                    Notify (SLPB, 0x80)
-                                    P8XH (Zero, 0x5D)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_0, 0x02)) {}
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x03)) {}
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-
-                    Return (Zero)
-                }
-                Else
-                {
-                    Return (Zero)
-                }
-            }
-            Else
-            {
-                If (LEqual (Arg0, ToUUID ("c5c5d98d-360e-43af-b7c1-3ede8f669ad3")))
-                {
-                    ADBG ("Audio Player call")
-                    While (One)
-                    {
-                        Store (Arg2, _T_1)
-                        If (LEqual (_T_1, Zero))
-                        {
-                            If (LEqual (Arg1, Zero))
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x03                                           
-                                })
-                            }
-                            Else
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x00                                           
-                                })
-                            }
-                        }
-                        Else
-                        {
-                            If (LEqual (_T_1, One))
-                            {
-                                If (LEqual (DerefOf (Index (Arg3, Zero)), Zero))
-                                {
-                                    ADBG ("Audio not active")
-                                    Store (Zero, VBOK)
-                                }
-                                Else
-                                {
-                                    ADBG ("Audio is active")
-                                    Store (One, VBOK)
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-
-                    Return (Zero)
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
-        }
+        
     }
 
-    Scope (_SB.PCI0.SAT0.PRT0)
+    Scope (_SB.PCI0.SATA.PRT0)
     {
         Name (FDEV, Zero)
         Name (FDRP, Zero)
@@ -13609,7 +11875,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         }
     }
 
-    Scope (_SB.PCI0.SAT0.PRT1)
+    Scope (_SB.PCI0.SATA.PRT1)
     {
         Name (FDEV, Zero)
         Name (FDRP, Zero)
@@ -13665,7 +11931,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         }
     }
 
-    Scope (_SB.PCI0.SAT0.PRT2)
+    Scope (_SB.PCI0.SATA.PRT2)
     {
         Name (FDEV, Zero)
         Name (FDRP, Zero)
@@ -13721,7 +11987,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         }
     }
 
-    Scope (_SB.PCI0.SAT0.PRT3)
+    Scope (_SB.PCI0.SATA.PRT3)
     {
         Name (FDEV, Zero)
         Name (FDRP, Zero)
@@ -13758,131 +12024,13 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         Device (HECI)
         {
             Name (_ADR, 0x00160000)  // _ADR: Address
-            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-            {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                If (LEqual (Arg0, ToUUID ("1730e71d-e5dd-4a34-be57-4d76b6a2fe37")))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        If (LEqual (Arg1, Zero))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                        Else
-                        {
-                            Return (Zero)
-                        }
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        While (One)
-                        {
-                            Store (DerefOf (Index (Arg3, Zero)), _T_0)
-                            If (LEqual (_T_0, Zero)) {}
-                            Else
-                            {
-                                If (LEqual (_T_0, One))
-                                {
-                                    If (CondRefOf (\_SB.SLPB))
-                                    {
-                                        Notify (SLPB, 0x80)
-                                        P8XH (Zero, 0x5D)
-                                    }
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x02)) {}
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, 0x03)) {}
-                                    }
-                                }
-                            }
-
-                            Break
-                        }
-
-                        Return (Zero)
-                    }
-                    Else
-                    {
-                        Return (Zero)
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
+            
         }
     }
 
     Scope (_SB.PCI0.HDEF)
     {
-        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-        {
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-            If (LEqual (Arg0, ToUUID ("c5c5d98d-360e-43af-b7c1-3ede8f669ad3")))
-            {
-                ADBG ("Audio Player call")
-                While (One)
-                {
-                    Store (Arg2, _T_0)
-                    If (LEqual (_T_0, Zero))
-                    {
-                        If (LEqual (Arg1, Zero))
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x03                                           
-                            })
-                        }
-                        Else
-                        {
-                            Return (Buffer (One)
-                            {
-                                 0x00                                           
-                            })
-                        }
-                    }
-                    Else
-                    {
-                        If (LEqual (_T_0, One))
-                        {
-                            If (LEqual (DerefOf (Index (Arg3, Zero)), Zero))
-                            {
-                                ADBG ("Audio not active")
-                                Store (Zero, VBOK)
-                            }
-                            Else
-                            {
-                                ADBG ("Audio is active")
-                                Store (One, VBOK)
-                            }
-                        }
-                    }
-
-                    Break
-                }
-
-                Return (Zero)
-            }
-            Else
-            {
-                Return (Buffer (One)
-                {
-                     0x00                                           
-                })
-            }
-        }
+        
     }
 
     Scope (_SB.PCI0.XHC.RHUB)
@@ -15589,7 +13737,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         }
     }
 
-    Scope (_SB.PCI0.GFX0)
+    Scope (_SB.PCI0.IGPU)
     {
         Method (_DEP, 0, NotSerialized)  // _DEP: Dependencies
         {
@@ -15607,7 +13755,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         }
     }
 
-    Scope (_SB.PCI0.SAT0)
+    Scope (_SB.PCI0.SATA)
     {
         Method (_DEP, 0, NotSerialized)  // _DEP: Dependencies
         {
@@ -16345,25 +14493,25 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 0x02, 
                 Package (0x01)
                 {
-                    "\\_SB.PCI0.GFX0"
+                    "\\_SB.PCI0.IGPU"
                 }, 
 
                 Package (0x01)
                 {
-                    "\\_SB.PCI0.SAT0.PRT1"
+                    "\\_SB.PCI0.SATA.PRT1"
                 }
             })
             Name (DEVX, Package (0x08)
             {
                 Package (0x02)
                 {
-                    "\\_SB.PCI0.GFX0", 
+                    "\\_SB.PCI0.IGPU", 
                     0xFFFFFFFF
                 }, 
 
                 Package (0x02)
                 {
-                    "\\_SB.PCI0.SAT0.PRT1", 
+                    "\\_SB.PCI0.SATA.PRT1", 
                     0xFFFFFFFF
                 }, 
 
@@ -16467,7 +14615,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                 Package (0x03)
                 {
-                    "\\_SB.PCI0.GFX0", 
+                    "\\_SB.PCI0.IGPU", 
                     One, 
                     Package (0x02)
                     {
@@ -16482,7 +14630,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                 Package (0x03)
                 {
-                    "\\_SB.PCI0.SAT0", 
+                    "\\_SB.PCI0.SATA", 
                     Zero, 
                     Package (0x02)
                     {
@@ -16498,7 +14646,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                 Package (0x03)
                 {
-                    "\\_SB.PCI0.SAT0.PRT0", 
+                    "\\_SB.PCI0.SATA.PRT0", 
                     Zero, 
                     Package (0x02)
                     {
@@ -16514,7 +14662,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                 Package (0x03)
                 {
-                    "\\_SB.PCI0.SAT0.PRT1", 
+                    "\\_SB.PCI0.SATA.PRT1", 
                     Zero, 
                     Package (0x02)
                     {
@@ -16530,7 +14678,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                 Package (0x03)
                 {
-                    "\\_SB.PCI0.SAT0.PRT2", 
+                    "\\_SB.PCI0.SATA.PRT2", 
                     Zero, 
                     Package (0x02)
                     {
@@ -16546,7 +14694,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                 Package (0x03)
                 {
-                    "\\_SB.PCI0.SAT0.PRT3", 
+                    "\\_SB.PCI0.SATA.PRT3", 
                     Zero, 
                     Package (0x02)
                     {
@@ -16952,7 +15100,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             {
                 Package (0x02)
                 {
-                    "\\_SB.PCI0.SAT0", 
+                    "\\_SB.PCI0.SATA", 
                     Package (0x01)
                     {
                         Package (0x03)
@@ -16980,7 +15128,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                 Package (0x02)
                 {
-                    "\\_SB.PCI0.SAT0.PRT0", 
+                    "\\_SB.PCI0.SATA.PRT0", 
                     Package (0x01)
                     {
                         Package (0x03)
@@ -17008,7 +15156,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                 Package (0x02)
                 {
-                    "\\_SB.PCI0.SAT0.PRT1", 
+                    "\\_SB.PCI0.SATA.PRT1", 
                     Package (0x01)
                     {
                         Package (0x03)
@@ -17036,7 +15184,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                 Package (0x02)
                 {
-                    "\\_SB.PCI0.SAT0.PRT2", 
+                    "\\_SB.PCI0.SATA.PRT2", 
                     Package (0x01)
                     {
                         Package (0x03)
@@ -17064,7 +15212,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                 Package (0x02)
                 {
-                    "\\_SB.PCI0.SAT0.PRT3", 
+                    "\\_SB.PCI0.SATA.PRT3", 
                     Package (0x01)
                     {
                         Package (0x03)
@@ -17330,302 +15478,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Return (Zero)
             }
 
-            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-            {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                ADBG (Concatenate ("PEPY = ", ToHexString (PEPY)))
-                ADBG (Concatenate ("PEPC = ", ToHexString (PEPC)))
-                If (LEqual (Arg0, ToUUID ("b8febfe0-baf8-454b-aecd-49fb91137b21")))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x07                                           
-                        })
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        Store (One, PEPP)
-                        Return (0x0F)
-                    }
-
-                    If (LEqual (Arg2, 0x02))
-                    {
-                        If (LEqual (Arg1, Zero))
-                        {
-                            While (One)
-                            {
-                                Store (PEPY, _T_0)
-                                If (LEqual (_T_0, One))
-                                {
-                                    Return (Package (0x02)
-                                    {
-                                        One, 
-                                        Package (0x01)
-                                        {
-                                            "\\_SB.PCI0.GFX0"
-                                        }
-                                    })
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x02))
-                                    {
-                                        Return (Package (0x02)
-                                        {
-                                            One, 
-                                            Package (0x01)
-                                            {
-                                                "\\_SB.PCI0.SAT0.PRT1"
-                                            }
-                                        })
-                                    }
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, 0x03))
-                                        {
-                                            Return (DEVS)
-                                        }
-                                        Else
-                                        {
-                                            Return (Package (0x01)
-                                            {
-                                                Zero
-                                            })
-                                        }
-                                    }
-                                }
-
-                                Break
-                            }
-                        }
-
-                        If (LEqual (Arg1, One))
-                        {
-                            If (LNot (And (PEPY, One)))
-                            {
-                                Store (Zero, Index (DerefOf (Index (DEVX, Zero)), One))
-                            }
-
-                            If (LNot (And (PEPY, 0x02)))
-                            {
-                                Store (Zero, Index (DerefOf (Index (DEVX, One)), One))
-                            }
-
-                            If (LNot (And (PEPY, 0x04)))
-                            {
-                                Store (Zero, Index (DerefOf (Index (DEVX, 0x02)), One))
-                            }
-
-                            If (LNot (And (PEPY, 0x08)))
-                            {
-                                Store (Zero, Index (DerefOf (Index (DEVX, 0x03)), One))
-                            }
-
-                            If (LNot (And (PEPY, 0x10)))
-                            {
-                                Store (Zero, Index (DerefOf (Index (DEVX, 0x04)), One))
-                            }
-
-                            If (LNot (And (PEPY, 0x20)))
-                            {
-                                Store (Zero, Index (DerefOf (Index (DEVX, 0x05)), One))
-                            }
-
-                            If (LNot (And (PEPY, 0x40)))
-                            {
-                                Store (Zero, Index (DerefOf (Index (DEVX, 0x06)), One))
-                            }
-
-                            If (LNot (And (PEPY, 0x80)))
-                            {
-                                Store (Zero, Index (DerefOf (Index (DEVX, 0x07)), One))
-                            }
-
-                            Return (DEVX)
-                        }
-                    }
-                }
-
-                If (LEqual (Arg0, ToUUID ("c4eb40a0-6cd2-11e2-bcfd-0800200c9a66")))
-                {
-                    If (LEqual (Arg2, Zero))
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x07                                           
-                        })
-                    }
-
-                    If (LEqual (Arg2, One))
-                    {
-                        If (LEqual (And (PEPC, 0x03), One))
-                        {
-                            If (And (SPST, One))
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x06)), One))
-                            }
-
-                            If (And (SPST, 0x02))
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x07)), One))
-                            }
-
-                            If (And (SPST, 0x04))
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x08)), One))
-                            }
-
-                            If (And (SPST, 0x08))
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x09)), One))
-                            }
-
-                            If (^^PCI0.RP01.PXSX.PAHC ())
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x1A)), One))
-                            }
-
-                            If (^^PCI0.RP02.PXSX.PAHC ())
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x1B)), One))
-                            }
-
-                            If (^^PCI0.RP03.PXSX.PAHC ())
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x1C)), One))
-                            }
-
-                            If (^^PCI0.RP04.PXSX.PAHC ())
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x1D)), One))
-                            }
-
-                            If (^^PCI0.RP06.PXSX.PAHC ())
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x1F)), One))
-                            }
-
-                            If (^^PCI0.RP07.PXSX.PAHC ())
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x20)), One))
-                            }
-
-                            If (^^PCI0.RP08.PXSX.PAHC ())
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x21)), One))
-                            }
-                        }
-
-                        If (LEqual (And (PEPC, 0x03), 0x02))
-                        {
-                            If (And (SPST, 0x0F))
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x05)), One))
-                            }
-
-                            If (LOr (^^PCI0.RP01.PXSX.PAHC (), ^^PCI0.RP01.PXSX.PNVM ()))
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x12)), One))
-                            }
-
-                            If (LOr (^^PCI0.RP02.PXSX.PAHC (), ^^PCI0.RP02.PXSX.PNVM ()))
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x13)), One))
-                            }
-
-                            If (LOr (^^PCI0.RP03.PXSX.PAHC (), ^^PCI0.RP03.PXSX.PNVM ()))
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x14)), One))
-                            }
-
-                            If (LOr (^^PCI0.RP04.PXSX.PAHC (), ^^PCI0.RP04.PXSX.PNVM ()))
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x15)), One))
-                            }
-
-                            If (LOr (^^PCI0.RP06.PXSX.PAHC (), ^^PCI0.RP06.PXSX.PNVM ()))
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x17)), One))
-                            }
-
-                            If (LOr (^^PCI0.RP07.PXSX.PAHC (), ^^PCI0.RP07.PXSX.PNVM ()))
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x18)), One))
-                            }
-
-                            If (LOr (^^PCI0.RP08.PXSX.PAHC (), ^^PCI0.RP08.PXSX.PNVM ()))
-                            {
-                                Store (One, Index (DerefOf (Index (DEVY, 0x19)), One))
-                            }
-                        }
-
-                        If (LEqual (And (PEPC, 0x04), Zero))
-                        {
-                            Store (Zero, Index (DerefOf (Index (DEVY, 0x0A)), One))
-                        }
-
-                        If (LEqual (And (PEPC, 0x08), Zero))
-                        {
-                            Store (Zero, Index (DerefOf (Index (DEVY, 0x0B)), One))
-                        }
-
-                        If (LEqual (And (PEPC, 0x10), Zero))
-                        {
-                            Store (Zero, Index (DerefOf (Index (DEVY, 0x0C)), One))
-                        }
-
-                        If (LEqual (And (PEPC, 0x20), Zero))
-                        {
-                            Store (Zero, Index (DerefOf (Index (DEVY, 0x0D)), One))
-                        }
-
-                        If (LEqual (And (PEPC, 0x40), Zero))
-                        {
-                            Store (Zero, Index (DerefOf (Index (DEVY, 0x0E)), One))
-                        }
-
-                        If (LEqual (And (PEPC, 0x80), Zero))
-                        {
-                            Store (Zero, Index (DerefOf (Index (DEVY, 0x0F)), One))
-                        }
-
-                        If (LEqual (And (PEPC, 0x0100), Zero))
-                        {
-                            Store (Zero, Index (DerefOf (Index (DEVY, 0x10)), One))
-                        }
-
-                        If (LEqual (And (PEPC, 0x0200), Zero))
-                        {
-                            Store (Zero, Index (DerefOf (Index (DEVY, 0x11)), One))
-                        }
-
-                        If (LEqual (And (PEPC, 0x1000), Zero))
-                        {
-                            Store (Zero, Index (DerefOf (Index (DEVY, Zero)), One))
-                            Store (Zero, Index (DerefOf (Index (DEVY, One)), One))
-                            Store (Zero, Index (DerefOf (Index (DEVY, 0x02)), One))
-                            Store (Zero, Index (DerefOf (Index (DEVY, 0x03)), One))
-                        }
-
-                        If (LEqual (And (PEPC, 0x2000), Zero))
-                        {
-                            Store (Zero, Index (DerefOf (Index (DEVY, 0x04)), One))
-                        }
-
-                        Return (DEVY)
-                    }
-
-                    If (LEqual (Arg2, 0x02))
-                    {
-                        Return (BCCD)
-                    }
-                }
-
-                Return (One)
-            }
+            
         }
     }
 
@@ -17697,24 +15550,9 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
     Method (ADBG, 1, Serialized)
     {
-        If (MDEN)
-        {
-            Store (SizeOf (Arg0), Local0)
-            Name (BUFS, Buffer (Local0) {})
-            Store (Arg0, BUFS)
-            MDGC (0x20)
-            While (Local0)
-            {
-                MDGC (DerefOf (Index (BUFS, Subtract (SizeOf (Arg0), Local0))))
-                Decrement (Local0)
-            }
+        
+        Return(0)
 
-            Store (MBUF, MDG0)
-        }
-        Else
-        {
-            Return (Zero)
-        }
     }
 
     Method (SHOW, 1, Serialized)
@@ -18535,42 +16373,42 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
             Method (GUBI, 0, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 Store (BMF0, Local1)
                 While (One)
                 {
-                    Store (Local1, _T_0)
-                    If (LEqual (_T_0, One))
+                    Store (Local1, T_0)
+                    If (LEqual (T_0, One))
                     {
                         Store ("SANYO ", Local0)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x02))
+                        If (LEqual (T_0, 0x02))
                         {
                             Store ("SONY ", Local0)
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x03))
+                            If (LEqual (T_0, 0x03))
                             {
                                 Store ("Simplo ", Local0)
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x04))
+                                If (LEqual (T_0, 0x04))
                                 {
                                     Store ("PANASONIC ", Local0)
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x05))
+                                    If (LEqual (T_0, 0x05))
                                     {
                                         Store ("SDI ", Local0)
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x06))
+                                        If (LEqual (T_0, 0x06))
                                         {
                                             Store ("LG ", Local0)
                                         }
@@ -18906,7 +16744,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             {
                 If (IGDS)
                 {
-                    Notify (^^^GFX0.DD1F, 0x87)
+                    Notify (^^^IGPU.DD1F, 0x87)
                 }
                 Else
                 {
@@ -18918,7 +16756,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 {
                     Store (BRTS, Local1)
                     Add (Local1, One, Local1)
-                    ^^^GFX0.AINT (One, Multiply (Local1, 0x0A))
+                    ^^^IGPU.AINT (One, Multiply (Local1, 0x0A))
                 }
                 Else
                 {
@@ -18940,7 +16778,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             {
                 If (IGDS)
                 {
-                    Notify (^^^GFX0.DD1F, 0x86)
+                    Notify (^^^IGPU.DD1F, 0x86)
                 }
                 Else
                 {
@@ -18952,7 +16790,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 {
                     Store (BRTS, Local1)
                     Add (Local1, One, Local1)
-                    ^^^GFX0.AINT (One, Multiply (Local1, 0x0A))
+                    ^^^IGPU.AINT (One, Multiply (Local1, 0x0A))
                 }
                 Else
                 {
@@ -18972,9 +16810,9 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Store (LIDF, Local0)
                 Not (Local0, Local0)
                 Add (Local0, 0x02)
-                If (^^^GFX0.GLID (Local0))
+                If (^^^IGPU.GLID (Local0))
                 {
-                    Or (0x80000000, ^^^GFX0.CLID, ^^^GFX0.CLID)
+                    Or (0x80000000, ^^^IGPU.CLID, ^^^IGPU.CLID)
                 }
 
                 Notify (LID0, 0x80)
@@ -18986,8 +16824,8 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
             Store (0x1C, P80H)
             If (LOr (LEqual (DPMD, Zero), LEqual (DPMD, 0x04)))
             {
-                ^^^GFX0.WKAR ()
-                ^^^GFX0.GHDS (One)
+                ^^^IGPU.WKAR ()
+                ^^^IGPU.GHDS (One)
             }
         }
 
@@ -19059,101 +16897,11 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
     If (LEqual (BID, One))
     {
-        Scope (_SB.PCI0.SAT0)
+        Scope (_SB.PCI0.SATA)
         {
             Scope (PRT2)
             {
-                Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-                {
-                    Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-                    Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                    If (LEqual (Arg0, ToUUID ("bdfaef30-aebb-11de-8a39-0800200c9a66")))
-                    {
-                        While (One)
-                        {
-                            Store (ToInteger (Arg2), _T_0)
-                            If (LEqual (_T_0, Zero))
-                            {
-                                While (One)
-                                {
-                                    Store (ToInteger (Arg1), _T_1)
-                                    If (LEqual (_T_1, One))
-                                    {
-                                        If (LEqual (PFLV, 0x02))
-                                        {
-                                            Return (Buffer (One)
-                                            {
-                                                 0x00                                           
-                                            })
-                                        }
-
-                                        Return (Buffer (One)
-                                        {
-                                             0x0F                                           
-                                        })
-                                    }
-                                    Else
-                                    {
-                                        Return (Buffer (One)
-                                        {
-                                             0x00                                           
-                                        })
-                                    }
-
-                                    Break
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_0, One))
-                                {
-                                    Return (One)
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x02))
-                                    {
-                                        Store (Zero, GPE3)
-                                        If (LEqual (And (GL00, 0x08), 0x08))
-                                        {
-                                            Or (GIV0, 0x08, GIV0)
-                                        }
-                                        Else
-                                        {
-                                            And (GIV0, 0xF7, GIV0)
-                                        }
-
-                                        And (GL08, 0xEF, GL08)
-                                        Sleep (0xC8)
-                                        Store (One, GPS3)
-                                        Store (One, GPE3)
-                                        Return (One)
-                                    }
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, 0x03))
-                                        {
-                                            Store (Zero, GPE3)
-                                            Store (One, GPS3)
-                                            Or (GL08, 0x10, GL08)
-                                            Return (One)
-                                        }
-                                        Else
-                                        {
-                                            Return (Zero)
-                                        }
-                                    }
-                                }
-                            }
-
-                            Break
-                        }
-                    }
-                    Else
-                    {
-                        Return (Zero)
-                    }
-                }
+                
             }
         }
 
@@ -19168,7 +16916,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                 Store (Zero, GPE3)
                 Or (GL08, 0x10, GL08)
-                Notify (\_SB.PCI0.SAT0, 0x82)
+                Notify (\_SB.PCI0.SATA, 0x82)
                 Return (Zero)
             }
         }
@@ -19288,129 +17036,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
     Scope (_SB.PCI0.RP01.PXSX)
     {
-        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-        {
-            Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-            If (LEqual (Arg0, ToUUID ("1730e71d-e5dd-4a34-be57-4d76b6a2fe37")))
-            {
-                If (LEqual (Arg2, Zero))
-                {
-                    If (LEqual (Arg1, Zero))
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x03                                           
-                        })
-                    }
-                    Else
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x00                                           
-                        })
-                    }
-                }
-
-                If (LEqual (Arg2, One))
-                {
-                    While (One)
-                    {
-                        Store (DerefOf (Index (Arg3, Zero)), _T_0)
-                        If (LEqual (_T_0, Zero)) {}
-                        Else
-                        {
-                            If (LEqual (_T_0, One))
-                            {
-                                If (CondRefOf (\_SB.SLPB))
-                                {
-                                    Notify (SLPB, 0x80)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_0, 0x02)) {}
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x03)) {}
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, 0x04))
-                                        {
-                                            If (CondRefOf (\_SB.SLPB))
-                                            {
-                                                Notify (SLPB, 0x02)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-
-                Return (Zero)
-            }
-            Else
-            {
-                If (LEqual (Arg0, ToUUID ("7574eb17-d1a2-4cc2-9929-4a08fcc29107")))
-                {
-                    While (One)
-                    {
-                        Store (Arg2, _T_1)
-                        If (LEqual (_T_1, Zero))
-                        {
-                            If (LEqual (Arg1, Zero))
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x07                                           
-                                })
-                            }
-                            Else
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x00                                           
-                                })
-                            }
-                        }
-                        Else
-                        {
-                            If (LEqual (_T_1, One))
-                            {
-                                Return (WHIT ())
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x02))
-                                {
-                                    Return (SELF ())
-                                }
-                                Else
-                                {
-                                    Return (Buffer (One)
-                                    {
-                                         0x00                                           
-                                    })
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
-        }
+        
 
         OperationRegion (RPXX, PCI_Config, Zero, 0x10)
         Field (RPXX, AnyAcc, NoLock, Preserve)
@@ -19444,47 +17070,47 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         })
         Method (SPLC, 0, Serialized)
         {
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             While (One)
             {
-                Store (VDID, _T_0)
-                If (LEqual (_T_0, 0x093C8086))
+                Store (VDID, T_0)
+                If (LEqual (T_0, 0x093C8086))
                 {
                     Break
                 }
                 Else
                 {
-                    If (LEqual (_T_0, 0x095A8086))
+                    If (LEqual (T_0, 0x095A8086))
                     {
                         Break
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x095B8086))
+                        If (LEqual (T_0, 0x095B8086))
                         {
                             Break
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x08B18086))
+                            If (LEqual (T_0, 0x08B18086))
                             {
                                 Break
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x08B28086))
+                                If (LEqual (T_0, 0x08B28086))
                                 {
                                     Break
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x08B38086))
+                                    If (LEqual (T_0, 0x08B38086))
                                     {
                                         Break
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x08B48086))
+                                        If (LEqual (T_0, 0x08B48086))
                                         {
                                             Break
                                         }
@@ -19578,129 +17204,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
     Scope (_SB.PCI0.RP02.PXSX)
     {
-        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-        {
-            Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-            If (LEqual (Arg0, ToUUID ("1730e71d-e5dd-4a34-be57-4d76b6a2fe37")))
-            {
-                If (LEqual (Arg2, Zero))
-                {
-                    If (LEqual (Arg1, Zero))
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x03                                           
-                        })
-                    }
-                    Else
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x00                                           
-                        })
-                    }
-                }
-
-                If (LEqual (Arg2, One))
-                {
-                    While (One)
-                    {
-                        Store (DerefOf (Index (Arg3, Zero)), _T_0)
-                        If (LEqual (_T_0, Zero)) {}
-                        Else
-                        {
-                            If (LEqual (_T_0, One))
-                            {
-                                If (CondRefOf (\_SB.SLPB))
-                                {
-                                    Notify (SLPB, 0x80)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_0, 0x02)) {}
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x03)) {}
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, 0x04))
-                                        {
-                                            If (CondRefOf (\_SB.SLPB))
-                                            {
-                                                Notify (SLPB, 0x02)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-
-                Return (Zero)
-            }
-            Else
-            {
-                If (LEqual (Arg0, ToUUID ("7574eb17-d1a2-4cc2-9929-4a08fcc29107")))
-                {
-                    While (One)
-                    {
-                        Store (Arg2, _T_1)
-                        If (LEqual (_T_1, Zero))
-                        {
-                            If (LEqual (Arg1, Zero))
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x07                                           
-                                })
-                            }
-                            Else
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x00                                           
-                                })
-                            }
-                        }
-                        Else
-                        {
-                            If (LEqual (_T_1, One))
-                            {
-                                Return (WHIT ())
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x02))
-                                {
-                                    Return (SELF ())
-                                }
-                                Else
-                                {
-                                    Return (Buffer (One)
-                                    {
-                                         0x00                                           
-                                    })
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
-        }
+        
 
         OperationRegion (RPXX, PCI_Config, Zero, 0x10)
         Field (RPXX, AnyAcc, NoLock, Preserve)
@@ -19734,47 +17238,47 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         })
         Method (SPLC, 0, Serialized)
         {
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             While (One)
             {
-                Store (VDID, _T_0)
-                If (LEqual (_T_0, 0x093C8086))
+                Store (VDID, T_0)
+                If (LEqual (T_0, 0x093C8086))
                 {
                     Break
                 }
                 Else
                 {
-                    If (LEqual (_T_0, 0x095A8086))
+                    If (LEqual (T_0, 0x095A8086))
                     {
                         Break
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x095B8086))
+                        If (LEqual (T_0, 0x095B8086))
                         {
                             Break
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x08B18086))
+                            If (LEqual (T_0, 0x08B18086))
                             {
                                 Break
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x08B28086))
+                                If (LEqual (T_0, 0x08B28086))
                                 {
                                     Break
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x08B38086))
+                                    If (LEqual (T_0, 0x08B38086))
                                     {
                                         Break
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x08B48086))
+                                        If (LEqual (T_0, 0x08B48086))
                                         {
                                             Break
                                         }
@@ -19868,129 +17372,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
     Scope (_SB.PCI0.RP03.PXSX)
     {
-        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-        {
-            Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-            If (LEqual (Arg0, ToUUID ("1730e71d-e5dd-4a34-be57-4d76b6a2fe37")))
-            {
-                If (LEqual (Arg2, Zero))
-                {
-                    If (LEqual (Arg1, Zero))
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x03                                           
-                        })
-                    }
-                    Else
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x00                                           
-                        })
-                    }
-                }
-
-                If (LEqual (Arg2, One))
-                {
-                    While (One)
-                    {
-                        Store (DerefOf (Index (Arg3, Zero)), _T_0)
-                        If (LEqual (_T_0, Zero)) {}
-                        Else
-                        {
-                            If (LEqual (_T_0, One))
-                            {
-                                If (CondRefOf (\_SB.SLPB))
-                                {
-                                    Notify (SLPB, 0x80)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_0, 0x02)) {}
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x03)) {}
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, 0x04))
-                                        {
-                                            If (CondRefOf (\_SB.SLPB))
-                                            {
-                                                Notify (SLPB, 0x02)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-
-                Return (Zero)
-            }
-            Else
-            {
-                If (LEqual (Arg0, ToUUID ("7574eb17-d1a2-4cc2-9929-4a08fcc29107")))
-                {
-                    While (One)
-                    {
-                        Store (Arg2, _T_1)
-                        If (LEqual (_T_1, Zero))
-                        {
-                            If (LEqual (Arg1, Zero))
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x07                                           
-                                })
-                            }
-                            Else
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x00                                           
-                                })
-                            }
-                        }
-                        Else
-                        {
-                            If (LEqual (_T_1, One))
-                            {
-                                Return (WHIT ())
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x02))
-                                {
-                                    Return (SELF ())
-                                }
-                                Else
-                                {
-                                    Return (Buffer (One)
-                                    {
-                                         0x00                                           
-                                    })
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
-        }
+        
 
         OperationRegion (RPXX, PCI_Config, Zero, 0x10)
         Field (RPXX, AnyAcc, NoLock, Preserve)
@@ -20024,47 +17406,47 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         })
         Method (SPLC, 0, Serialized)
         {
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             While (One)
             {
-                Store (VDID, _T_0)
-                If (LEqual (_T_0, 0x093C8086))
+                Store (VDID, T_0)
+                If (LEqual (T_0, 0x093C8086))
                 {
                     Break
                 }
                 Else
                 {
-                    If (LEqual (_T_0, 0x095A8086))
+                    If (LEqual (T_0, 0x095A8086))
                     {
                         Break
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x095B8086))
+                        If (LEqual (T_0, 0x095B8086))
                         {
                             Break
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x08B18086))
+                            If (LEqual (T_0, 0x08B18086))
                             {
                                 Break
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x08B28086))
+                                If (LEqual (T_0, 0x08B28086))
                                 {
                                     Break
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x08B38086))
+                                    If (LEqual (T_0, 0x08B38086))
                                     {
                                         Break
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x08B48086))
+                                        If (LEqual (T_0, 0x08B48086))
                                         {
                                             Break
                                         }
@@ -20158,129 +17540,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
     Scope (_SB.PCI0.RP04.PXSX)
     {
-        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-        {
-            Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-            If (LEqual (Arg0, ToUUID ("1730e71d-e5dd-4a34-be57-4d76b6a2fe37")))
-            {
-                If (LEqual (Arg2, Zero))
-                {
-                    If (LEqual (Arg1, Zero))
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x03                                           
-                        })
-                    }
-                    Else
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x00                                           
-                        })
-                    }
-                }
-
-                If (LEqual (Arg2, One))
-                {
-                    While (One)
-                    {
-                        Store (DerefOf (Index (Arg3, Zero)), _T_0)
-                        If (LEqual (_T_0, Zero)) {}
-                        Else
-                        {
-                            If (LEqual (_T_0, One))
-                            {
-                                If (CondRefOf (\_SB.SLPB))
-                                {
-                                    Notify (SLPB, 0x80)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_0, 0x02)) {}
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x03)) {}
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, 0x04))
-                                        {
-                                            If (CondRefOf (\_SB.SLPB))
-                                            {
-                                                Notify (SLPB, 0x02)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-
-                Return (Zero)
-            }
-            Else
-            {
-                If (LEqual (Arg0, ToUUID ("7574eb17-d1a2-4cc2-9929-4a08fcc29107")))
-                {
-                    While (One)
-                    {
-                        Store (Arg2, _T_1)
-                        If (LEqual (_T_1, Zero))
-                        {
-                            If (LEqual (Arg1, Zero))
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x07                                           
-                                })
-                            }
-                            Else
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x00                                           
-                                })
-                            }
-                        }
-                        Else
-                        {
-                            If (LEqual (_T_1, One))
-                            {
-                                Return (WHIT ())
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x02))
-                                {
-                                    Return (SELF ())
-                                }
-                                Else
-                                {
-                                    Return (Buffer (One)
-                                    {
-                                         0x00                                           
-                                    })
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
-        }
+        
 
         OperationRegion (RPXX, PCI_Config, Zero, 0x10)
         Field (RPXX, AnyAcc, NoLock, Preserve)
@@ -20314,47 +17574,47 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         })
         Method (SPLC, 0, Serialized)
         {
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             While (One)
             {
-                Store (VDID, _T_0)
-                If (LEqual (_T_0, 0x093C8086))
+                Store (VDID, T_0)
+                If (LEqual (T_0, 0x093C8086))
                 {
                     Break
                 }
                 Else
                 {
-                    If (LEqual (_T_0, 0x095A8086))
+                    If (LEqual (T_0, 0x095A8086))
                     {
                         Break
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x095B8086))
+                        If (LEqual (T_0, 0x095B8086))
                         {
                             Break
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x08B18086))
+                            If (LEqual (T_0, 0x08B18086))
                             {
                                 Break
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x08B28086))
+                                If (LEqual (T_0, 0x08B28086))
                                 {
                                     Break
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x08B38086))
+                                    If (LEqual (T_0, 0x08B38086))
                                     {
                                         Break
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x08B48086))
+                                        If (LEqual (T_0, 0x08B48086))
                                         {
                                             Break
                                         }
@@ -20448,129 +17708,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
     Scope (_SB.PCI0.RP06.PXSX)
     {
-        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-        {
-            Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-            If (LEqual (Arg0, ToUUID ("1730e71d-e5dd-4a34-be57-4d76b6a2fe37")))
-            {
-                If (LEqual (Arg2, Zero))
-                {
-                    If (LEqual (Arg1, Zero))
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x03                                           
-                        })
-                    }
-                    Else
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x00                                           
-                        })
-                    }
-                }
-
-                If (LEqual (Arg2, One))
-                {
-                    While (One)
-                    {
-                        Store (DerefOf (Index (Arg3, Zero)), _T_0)
-                        If (LEqual (_T_0, Zero)) {}
-                        Else
-                        {
-                            If (LEqual (_T_0, One))
-                            {
-                                If (CondRefOf (\_SB.SLPB))
-                                {
-                                    Notify (SLPB, 0x80)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_0, 0x02)) {}
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x03)) {}
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, 0x04))
-                                        {
-                                            If (CondRefOf (\_SB.SLPB))
-                                            {
-                                                Notify (SLPB, 0x02)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-
-                Return (Zero)
-            }
-            Else
-            {
-                If (LEqual (Arg0, ToUUID ("7574eb17-d1a2-4cc2-9929-4a08fcc29107")))
-                {
-                    While (One)
-                    {
-                        Store (Arg2, _T_1)
-                        If (LEqual (_T_1, Zero))
-                        {
-                            If (LEqual (Arg1, Zero))
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x07                                           
-                                })
-                            }
-                            Else
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x00                                           
-                                })
-                            }
-                        }
-                        Else
-                        {
-                            If (LEqual (_T_1, One))
-                            {
-                                Return (WHIT ())
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x02))
-                                {
-                                    Return (SELF ())
-                                }
-                                Else
-                                {
-                                    Return (Buffer (One)
-                                    {
-                                         0x00                                           
-                                    })
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
-        }
+        
 
         OperationRegion (RPXX, PCI_Config, Zero, 0x10)
         Field (RPXX, AnyAcc, NoLock, Preserve)
@@ -20604,47 +17742,47 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         })
         Method (SPLC, 0, Serialized)
         {
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             While (One)
             {
-                Store (VDID, _T_0)
-                If (LEqual (_T_0, 0x093C8086))
+                Store (VDID, T_0)
+                If (LEqual (T_0, 0x093C8086))
                 {
                     Break
                 }
                 Else
                 {
-                    If (LEqual (_T_0, 0x095A8086))
+                    If (LEqual (T_0, 0x095A8086))
                     {
                         Break
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x095B8086))
+                        If (LEqual (T_0, 0x095B8086))
                         {
                             Break
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x08B18086))
+                            If (LEqual (T_0, 0x08B18086))
                             {
                                 Break
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x08B28086))
+                                If (LEqual (T_0, 0x08B28086))
                                 {
                                     Break
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x08B38086))
+                                    If (LEqual (T_0, 0x08B38086))
                                     {
                                         Break
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x08B48086))
+                                        If (LEqual (T_0, 0x08B48086))
                                         {
                                             Break
                                         }
@@ -20738,129 +17876,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
     Scope (_SB.PCI0.RP07.PXSX)
     {
-        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-        {
-            Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-            If (LEqual (Arg0, ToUUID ("1730e71d-e5dd-4a34-be57-4d76b6a2fe37")))
-            {
-                If (LEqual (Arg2, Zero))
-                {
-                    If (LEqual (Arg1, Zero))
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x03                                           
-                        })
-                    }
-                    Else
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x00                                           
-                        })
-                    }
-                }
-
-                If (LEqual (Arg2, One))
-                {
-                    While (One)
-                    {
-                        Store (DerefOf (Index (Arg3, Zero)), _T_0)
-                        If (LEqual (_T_0, Zero)) {}
-                        Else
-                        {
-                            If (LEqual (_T_0, One))
-                            {
-                                If (CondRefOf (\_SB.SLPB))
-                                {
-                                    Notify (SLPB, 0x80)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_0, 0x02)) {}
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x03)) {}
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, 0x04))
-                                        {
-                                            If (CondRefOf (\_SB.SLPB))
-                                            {
-                                                Notify (SLPB, 0x02)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-
-                Return (Zero)
-            }
-            Else
-            {
-                If (LEqual (Arg0, ToUUID ("7574eb17-d1a2-4cc2-9929-4a08fcc29107")))
-                {
-                    While (One)
-                    {
-                        Store (Arg2, _T_1)
-                        If (LEqual (_T_1, Zero))
-                        {
-                            If (LEqual (Arg1, Zero))
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x07                                           
-                                })
-                            }
-                            Else
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x00                                           
-                                })
-                            }
-                        }
-                        Else
-                        {
-                            If (LEqual (_T_1, One))
-                            {
-                                Return (WHIT ())
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x02))
-                                {
-                                    Return (SELF ())
-                                }
-                                Else
-                                {
-                                    Return (Buffer (One)
-                                    {
-                                         0x00                                           
-                                    })
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
-        }
+        
 
         OperationRegion (RPXX, PCI_Config, Zero, 0x10)
         Field (RPXX, AnyAcc, NoLock, Preserve)
@@ -20894,47 +17910,47 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         })
         Method (SPLC, 0, Serialized)
         {
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             While (One)
             {
-                Store (VDID, _T_0)
-                If (LEqual (_T_0, 0x093C8086))
+                Store (VDID, T_0)
+                If (LEqual (T_0, 0x093C8086))
                 {
                     Break
                 }
                 Else
                 {
-                    If (LEqual (_T_0, 0x095A8086))
+                    If (LEqual (T_0, 0x095A8086))
                     {
                         Break
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x095B8086))
+                        If (LEqual (T_0, 0x095B8086))
                         {
                             Break
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x08B18086))
+                            If (LEqual (T_0, 0x08B18086))
                             {
                                 Break
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x08B28086))
+                                If (LEqual (T_0, 0x08B28086))
                                 {
                                     Break
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x08B38086))
+                                    If (LEqual (T_0, 0x08B38086))
                                     {
                                         Break
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x08B48086))
+                                        If (LEqual (T_0, 0x08B48086))
                                         {
                                             Break
                                         }
@@ -21028,129 +18044,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
     Scope (_SB.PCI0.RP08.PXSX)
     {
-        Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-        {
-            Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-            If (LEqual (Arg0, ToUUID ("1730e71d-e5dd-4a34-be57-4d76b6a2fe37")))
-            {
-                If (LEqual (Arg2, Zero))
-                {
-                    If (LEqual (Arg1, Zero))
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x03                                           
-                        })
-                    }
-                    Else
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x00                                           
-                        })
-                    }
-                }
-
-                If (LEqual (Arg2, One))
-                {
-                    While (One)
-                    {
-                        Store (DerefOf (Index (Arg3, Zero)), _T_0)
-                        If (LEqual (_T_0, Zero)) {}
-                        Else
-                        {
-                            If (LEqual (_T_0, One))
-                            {
-                                If (CondRefOf (\_SB.SLPB))
-                                {
-                                    Notify (SLPB, 0x80)
-                                }
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_0, 0x02)) {}
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x03)) {}
-                                    Else
-                                    {
-                                        If (LEqual (_T_0, 0x04))
-                                        {
-                                            If (CondRefOf (\_SB.SLPB))
-                                            {
-                                                Notify (SLPB, 0x02)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-
-                Return (Zero)
-            }
-            Else
-            {
-                If (LEqual (Arg0, ToUUID ("7574eb17-d1a2-4cc2-9929-4a08fcc29107")))
-                {
-                    While (One)
-                    {
-                        Store (Arg2, _T_1)
-                        If (LEqual (_T_1, Zero))
-                        {
-                            If (LEqual (Arg1, Zero))
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x07                                           
-                                })
-                            }
-                            Else
-                            {
-                                Return (Buffer (One)
-                                {
-                                     0x00                                           
-                                })
-                            }
-                        }
-                        Else
-                        {
-                            If (LEqual (_T_1, One))
-                            {
-                                Return (WHIT ())
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_1, 0x02))
-                                {
-                                    Return (SELF ())
-                                }
-                                Else
-                                {
-                                    Return (Buffer (One)
-                                    {
-                                         0x00                                           
-                                    })
-                                }
-                            }
-                        }
-
-                        Break
-                    }
-                }
-                Else
-                {
-                    Return (Buffer (One)
-                    {
-                         0x00                                           
-                    })
-                }
-            }
-        }
+        
 
         OperationRegion (RPXX, PCI_Config, Zero, 0x10)
         Field (RPXX, AnyAcc, NoLock, Preserve)
@@ -21184,47 +18078,47 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         })
         Method (SPLC, 0, Serialized)
         {
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             While (One)
             {
-                Store (VDID, _T_0)
-                If (LEqual (_T_0, 0x093C8086))
+                Store (VDID, T_0)
+                If (LEqual (T_0, 0x093C8086))
                 {
                     Break
                 }
                 Else
                 {
-                    If (LEqual (_T_0, 0x095A8086))
+                    If (LEqual (T_0, 0x095A8086))
                     {
                         Break
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x095B8086))
+                        If (LEqual (T_0, 0x095B8086))
                         {
                             Break
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x08B18086))
+                            If (LEqual (T_0, 0x08B18086))
                             {
                                 Break
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x08B28086))
+                                If (LEqual (T_0, 0x08B28086))
                                 {
                                     Break
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x08B38086))
+                                    If (LEqual (T_0, 0x08B38086))
                                     {
                                         Break
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x08B48086))
+                                        If (LEqual (T_0, 0x08B48086))
                                         {
                                             Break
                                         }
@@ -21642,7 +18536,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                 Name (IDFU, Zero)
                 Method (_STA, 0, Serialized)  // _STA: Status
                 {
-                    Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                    Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                     If (LEqual (IVDF, Zero))
                     {
                         Return (Zero)
@@ -21687,12 +18581,12 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
 
                     While (One)
                     {
-                        Store (BID, _T_0)
+                        Store (BID, T_0)
                         If (LNotEqual (Match (Package (0x02)
                                         {
                                             0x31, 
                                             0x80
-                                        }, MEQ, _T_0, MTR, Zero, Zero), Ones))
+                                        }, MEQ, T_0, MTR, Zero, Zero), Ones))
                         {
                             If (PRTE (0x04))
                             {
@@ -21704,7 +18598,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x4A))
+                            If (LEqual (T_0, 0x4A))
                             {
                                 If (PRTE (0x02))
                                 {
@@ -21726,98 +18620,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     Return (Zero)
                 }
 
-                Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
-                {
-                    Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
-                    If (LEqual (Arg0, ToUUID ("f5cf0ff7-5d60-4842-82c0-fa1a61d873f2")))
-                    {
-                        While (One)
-                        {
-                            Store (ToInteger (Arg2), _T_0)
-                            If (LEqual (_T_0, Zero))
-                            {
-                                If (LEqual (ToInteger (Arg1), Zero))
-                                {
-                                    Return (Buffer (One)
-                                    {
-                                         0x07                                           
-                                    })
-                                }
-
-                                Return (Buffer (One)
-                                {
-                                     0x00                                           
-                                })
-                            }
-                            Else
-                            {
-                                If (LEqual (_T_0, One))
-                                {
-                                    If (LEqual (DerefOf (Index (Arg3, Zero)), Zero))
-                                    {
-                                        If (LEqual (PCHS, One))
-                                        {
-                                            And (GL08, 0xFE, GL08)
-                                        }
-                                        Else
-                                        {
-                                            WTGP (0x3C, Zero)
-                                        }
-
-                                        Store (Zero, IDFU)
-                                    }
-                                    Else
-                                    {
-                                        If (LEqual (PCHS, One))
-                                        {
-                                            Or (GL08, One, GL08)
-                                        }
-                                        Else
-                                        {
-                                            WTGP (0x3C, One)
-                                        }
-
-                                        Store (One, IDFU)
-                                    }
-
-                                    Return (Zero)
-                                }
-                                Else
-                                {
-                                    If (LEqual (_T_0, 0x02))
-                                    {
-                                        If (LOr (LEqual (BID, 0x31), LEqual (BID, 0x80)))
-                                        {
-                                            If (LEqual (DerefOf (Index (Arg3, Zero)), Zero))
-                                            {
-                                                WTGP (0x54, Zero)
-                                            }
-                                            Else
-                                            {
-                                                WTGP (0x54, One)
-                                            }
-                                        }
-
-                                        Return (Zero)
-                                    }
-                                    Else
-                                    {
-                                        Return (Zero)
-                                    }
-                                }
-                            }
-
-                            Break
-                        }
-                    }
-                    Else
-                    {
-                        Return (Buffer (One)
-                        {
-                             0x00                                           
-                        })
-                    }
-                }
+                
             }
         }
     }

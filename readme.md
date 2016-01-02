@@ -42,7 +42,7 @@ You'll find all hardware related stuff in **information** folder. The basic hard
 
 **Screenshot:**
 
-[INXI Hardware](information/inxi.png)
+![INXI Hardware](https://raw.githubusercontent.com/GalaticStryder/Acer-E5-571-Hackintosh/master/information/inxi.png)
 
 Instructions
 -------------------------

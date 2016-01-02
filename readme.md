@@ -42,7 +42,7 @@ You'll find all hardware related stuff in **information** folder. The basic hard
 
 **Screenshot:**
 
-[ANXI Hardware](information/anxi.png)
+[INXI Hardware](information/inxi.png)
 
 Instructions
 -------------------------

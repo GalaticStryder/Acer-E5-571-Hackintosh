@@ -1,6 +1,6 @@
 Mac OS X on the Acer Aspire E5-571-376T
 ==========================
-![Acer Aspire E5-571-376T](http://static.acer.com/up/Resource/Acer/Notebooks/AGW2%20Aspire%20E/Images/20140325/Aspire_E5-571-531-551-521-511_nontouch_black_glare-sku-main.png)
+![Acer Aspire E5-571-376T](https://raw.githubusercontent.com/GalaticStryder/Acer-E5-571-Hackintosh/master/header.png)
 
 A place/guide for patches that allow booting OSX in the Acer E5-571-376T. Fow now, this repo is under construction (maybe forever), it'll take some time to get something decent as I'm newbie on it (GNU/Linux guy).
 All the processes are generically the same for a hackintosh laptop build (Intel), but DSDT/SSDT patching and some more specific things like kexts and stuff should be device/board particular.

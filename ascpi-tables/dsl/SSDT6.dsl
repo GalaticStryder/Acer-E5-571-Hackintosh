@@ -46,16 +46,13 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
      * External declarations that were imported from
      * the reference file [refs.txt]
      */
-    External (_SB_.PCI0.LPCB.H_EC.ECRD, MethodObj)    // 1 Arguments
-    External (_SB_.PCI0.LPCB.H_EC.ECWT, MethodObj)    // 2 Arguments
-    External (_SB_.PCI0.PEG0.PEGP.SGPO, MethodObj)    // 2 Arguments
 
     External (_SB_.PCI0, DeviceObj)
     External (_SB_.PCI0.AR02, MethodObj)    // 0 Arguments
     External (_SB_.PCI0.AR0A, MethodObj)    // 0 Arguments
     External (_SB_.PCI0.AR0B, MethodObj)    // 0 Arguments
-    External (_SB_.PCI0.B0D3, DeviceObj)
-    External (_SB_.PCI0.GFX0, DeviceObj)
+    External (_SB_.PCI0.HDAU, DeviceObj)
+    External (_SB_.PCI0.IGPU, DeviceObj)
     External (_SB_.PCI0.LPCB.EC0_.BRTS, FieldUnitObj)
     External (_SB_.PCI0.PEG0, DeviceObj)
     External (_SB_.PCI0.PEG0.PEGP, DeviceObj)
@@ -75,6 +72,10 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
     External (PNHM, FieldUnitObj)
     External (S0ID, FieldUnitObj)
     External (SCIS, FieldUnitObj)
+    
+    External (_SB_.PCI0.LPCB.H_EC.ECRD, MethodObj)    // 1 Arguments
+    External (_SB_.PCI0.LPCB.H_EC.ECWT, MethodObj)    // 2 Arguments
+    External (_SB_.PCI0.PEG0.PEGP.SGPO, MethodObj)    // 2 Arguments
 
     OperationRegion (SANV, SystemMemory, 0x9CFB5E18, 0x0156)
     Field (SANV, AnyAcc, Lock, Preserve)
@@ -253,17 +254,17 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
         Name (OPTS, Zero)
         Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
         {
-            Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_1, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             While (One)
             {
-                Store (ToInteger (Arg0), _T_0)
-                If (LEqual (_T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
+                Store (ToInteger (Arg0), T_0)
+                If (LEqual (T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
                 {
                     While (One)
                     {
-                        Store (ToInteger (Arg2), _T_1)
-                        If (LEqual (_T_1, Zero))
+                        Store (ToInteger (Arg2), T_1)
+                        If (LEqual (T_1, Zero))
                         {
                             If (LEqual (Arg1, 0x02))
                             {
@@ -287,7 +288,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                         }
                         Else
                         {
-                            If (LEqual (_T_1, 0x04))
+                            If (LEqual (T_1, 0x04))
                             {
                                 If (LEqual (Arg1, 0x02))
                                 {
@@ -311,7 +312,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                             }
                             Else
                             {
-                                If (LEqual (_T_1, 0x06))
+                                If (LEqual (T_1, 0x06))
                                 {
                                     If (LEqual (Arg1, 0x02))
                                     {
@@ -424,17 +425,17 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
         Name (OPTS, Zero)
         Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
         {
-            Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_1, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             While (One)
             {
-                Store (ToInteger (Arg0), _T_0)
-                If (LEqual (_T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
+                Store (ToInteger (Arg0), T_0)
+                If (LEqual (T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
                 {
                     While (One)
                     {
-                        Store (ToInteger (Arg2), _T_1)
-                        If (LEqual (_T_1, Zero))
+                        Store (ToInteger (Arg2), T_1)
+                        If (LEqual (T_1, Zero))
                         {
                             If (LEqual (Arg1, 0x02))
                             {
@@ -458,7 +459,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                         }
                         Else
                         {
-                            If (LEqual (_T_1, 0x04))
+                            If (LEqual (T_1, 0x04))
                             {
                                 If (LEqual (Arg1, 0x02))
                                 {
@@ -482,7 +483,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                             }
                             Else
                             {
-                                If (LEqual (_T_1, 0x06))
+                                If (LEqual (T_1, 0x06))
                                 {
                                     If (LEqual (Arg1, 0x02))
                                     {
@@ -595,17 +596,17 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
         Name (OPTS, Zero)
         Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
         {
-            Name (_T_1, Zero)  // _T_x: Emitted by ASL Compiler
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_1, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             While (One)
             {
-                Store (ToInteger (Arg0), _T_0)
-                If (LEqual (_T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
+                Store (ToInteger (Arg0), T_0)
+                If (LEqual (T_0, ToUUID ("e5c937d0-3553-4d7a-9117-ea4d19c3434d") /* Device Labeling Interface */))
                 {
                     While (One)
                     {
-                        Store (ToInteger (Arg2), _T_1)
-                        If (LEqual (_T_1, Zero))
+                        Store (ToInteger (Arg2), T_1)
+                        If (LEqual (T_1, Zero))
                         {
                             If (LEqual (Arg1, 0x02))
                             {
@@ -629,7 +630,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                         }
                         Else
                         {
-                            If (LEqual (_T_1, 0x04))
+                            If (LEqual (T_1, 0x04))
                             {
                                 If (LEqual (Arg1, 0x02))
                                 {
@@ -653,7 +654,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                             }
                             Else
                             {
-                                If (LEqual (_T_1, 0x06))
+                                If (LEqual (T_1, 0x06))
                                 {
                                     If (LEqual (Arg1, 0x02))
                                     {
@@ -703,7 +704,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
         }
     }
 
-    Scope (\_SB.PCI0.B0D3)
+    Scope (\_SB.PCI0.HDAU)
     {
         Name (BARA, 0x80000000)
         Name (BBAR, Zero)
@@ -1024,7 +1025,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
         }
     }
 
-    Scope (\_SB.PCI0.GFX0)
+    Scope (\_SB.PCI0.IGPU)
     {
         OperationRegion (PRT0, SystemIO, 0x80, 0x04)
         Field (PRT0, DWordAcc, Lock, Preserve)
@@ -2640,53 +2641,53 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
 
         Method (WPCH, 2, Serialized)
         {
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             While (One)
             {
-                Store (Arg0, _T_0)
-                If (LEqual (_T_0, One))
+                Store (Arg0, T_0)
+                If (LEqual (T_0, One))
                 {
                     Store (0x0400, NADL)
                     Store (Zero, NDL2)
                 }
                 Else
                 {
-                    If (LEqual (_T_0, 0x02))
+                    If (LEqual (T_0, 0x02))
                     {
                         Store (0x0400, NADL)
                         Store (0x0100, NDL2)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x03))
+                        If (LEqual (T_0, 0x03))
                         {
                             Store (0x0100, NADL)
                             Store (Zero, NDL2)
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x04))
+                            If (LEqual (T_0, 0x04))
                             {
                                 Store (0x0100, NADL)
                                 Store (0x0304, NDL2)
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x05))
+                                If (LEqual (T_0, 0x05))
                                 {
                                     Store (0x0400, NADL)
                                     Store (0x0304, NDL2)
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x06))
+                                    If (LEqual (T_0, 0x06))
                                     {
                                         Store (0x0304, NADL)
                                         Store (Zero, NDL2)
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x07))
+                                        If (LEqual (T_0, 0x07))
                                         {
                                             If (LEqual (Arg1, One))
                                             {
@@ -2701,7 +2702,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                                         }
                                         Else
                                         {
-                                            If (LEqual (_T_0, 0x08))
+                                            If (LEqual (T_0, 0x08))
                                             {
                                                 If (LEqual (Arg1, One))
                                                 {
@@ -2716,7 +2717,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                                             }
                                             Else
                                             {
-                                                If (LEqual (_T_0, 0x09))
+                                                If (LEqual (T_0, 0x09))
                                                 {
                                                     If (LEqual (Arg1, One))
                                                     {
@@ -2731,7 +2732,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                                                 }
                                                 Else
                                                 {
-                                                    If (LEqual (_T_0, 0x0A))
+                                                    If (LEqual (T_0, 0x0A))
                                                     {
                                                         If (LEqual (Arg1, One))
                                                         {
@@ -2765,38 +2766,38 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
 
         Method (WKAR, 0, Serialized)
         {
-            Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+            Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
             Store (One, Local0)
-            If (\_SB.PCI0.GFX0.CPDS (0x80000100))
+            If (\_SB.PCI0.IGPU.CPDS (0x80000100))
             {
                 Or (Local0, 0x02, Local0)
             }
 
-            If (\_SB.PCI0.GFX0.CPDS (0x80007334))
+            If (\_SB.PCI0.IGPU.CPDS (0x80007334))
             {
                 Or (Local0, 0x04, Local0)
             }
 
-            If (\_SB.PCI0.GFX0.CPDS (0x80006330))
+            If (\_SB.PCI0.IGPU.CPDS (0x80006330))
             {
                 Or (Local0, 0x08, Local0)
             }
 
-            If (\_SB.PCI0.GFX0.CPDS (0x80006332))
+            If (\_SB.PCI0.IGPU.CPDS (0x80006332))
             {
                 Or (Local0, 0x10, Local0)
             }
 
             While (One)
             {
-                Store (Local0, _T_0)
-                If (LEqual (_T_0, One))
+                Store (Local0, T_0)
+                If (LEqual (T_0, One))
                 {
                     WPCH (One, Zero)
                 }
                 Else
                 {
-                    If (LEqual (_T_0, 0x03))
+                    If (LEqual (T_0, 0x03))
                     {
                         If (LAnd (LEqual (CDDS (0x80000400), 0x1F), LEqual (CDDS (0x80000100), 0x1F)))
                         {
@@ -2819,7 +2820,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x05))
+                        If (LEqual (T_0, 0x05))
                         {
                             If (LAnd (LEqual (CDDS (0x80000400), 0x1F), LEqual (CDDS (0x80007334), 0x1F)))
                             {
@@ -2842,7 +2843,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x07))
+                            If (LEqual (T_0, 0x07))
                             {
                                 If (LAnd (LEqual (CDDS (0x80000400), 0x1F), LEqual (CDDS (0x80000100), 0x1F)))
                                 {
@@ -2886,7 +2887,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x09))
+                                If (LEqual (T_0, 0x09))
                                 {
                                     If (LAnd (LEqual (CDDS (0x80000400), 0x1F), LEqual (CDDS (0x80006330), 0x1F)))
                                     {
@@ -2909,7 +2910,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x0D))
+                                    If (LEqual (T_0, 0x0D))
                                     {
                                         If (LAnd (LEqual (CDDS (0x80000400), 0x1F), LAnd (LEqual (CDDS (0x80007334), 0x1F), LEqual (
                                             CDDS (0x80006330), 0x1F))))
@@ -2954,7 +2955,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x11))
+                                        If (LEqual (T_0, 0x11))
                                         {
                                             If (LAnd (LEqual (CDDS (0x80000400), 0x1F), LEqual (CDDS (0x80006332), 0x1F)))
                                             {
@@ -2977,7 +2978,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                                         }
                                         Else
                                         {
-                                            If (LEqual (_T_0, 0x15))
+                                            If (LEqual (T_0, 0x15))
                                             {
                                                 If (LAnd (LEqual (CDDS (0x80000400), 0x1F), LAnd (LEqual (CDDS (0x80007334), 0x1F), LEqual (
                                                     CDDS (0x80006332), 0x1F))))
@@ -3510,12 +3511,12 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                     If (LEqual (PARM, One))
                     {
                         Or (\_SB.PCI0.AUDE, 0x20, \_SB.PCI0.AUDE)
-                        \_SB.PCI0.B0D3.ABWA (One)
-                        \_SB.PCI0.B0D3.ARST ()
-                        \_SB.PCI0.B0D3.ASTR ()
-                        \_SB.PCI0.B0D3.AINI ()
-                        \_SB.PCI0.B0D3.CXDC ()
-                        \_SB.PCI0.B0D3.ABWA (Zero)
+                        \_SB.PCI0.HDAU.ABWA (One)
+                        \_SB.PCI0.HDAU.ARST ()
+                        \_SB.PCI0.HDAU.ASTR ()
+                        \_SB.PCI0.HDAU.AINI ()
+                        \_SB.PCI0.HDAU.CXDC ()
+                        \_SB.PCI0.HDAU.ABWA (Zero)
                         Notify (\_SB.PCI0, Zero)
                     }
 
@@ -3533,7 +3534,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
                 If (LEqual (GESF, 0x16))
                 {
                     And (PARM, 0x03, Local0)
-                    \_SB.PCI0.B0D3.DCCC (Local0)
+                    \_SB.PCI0.HDAU.DCCC (Local0)
                     Store (Zero, GESF)
                     Return (SUCC)
                 }
@@ -3585,7 +3586,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
             Store (0x03, CSTS)
             If (LAnd (LEqual (CHPD, Zero), LEqual (Arg1, Zero)))
             {
-                Notify (\_SB.PCI0.GFX0, Arg1)
+                Notify (\_SB.PCI0.IGPU, Arg1)
             }
 
             If (CondRefOf (HNOT))
@@ -3594,7 +3595,7 @@ DefinitionBlock ("SSDT6.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00003000)
             }
             Else
             {
-                Notify (\_SB.PCI0.GFX0, 0x80)
+                Notify (\_SB.PCI0.IGPU, 0x80)
             }
 
             Return (Zero)

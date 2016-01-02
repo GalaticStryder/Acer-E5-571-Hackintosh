@@ -147,23 +147,23 @@ DefinitionBlock ("SSDT2.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00001000)
             Name (_STA, 0x0F)  // _STA: Status
             Method (TSDL, 0, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 While (One)
                 {
-                    Store (BID, _T_0)
-                    If (LEqual (_T_0, 0x38))
+                    Store (BID, T_0)
+                    If (LEqual (T_0, 0x38))
                     {
                         Return (TSD4)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x30))
+                        If (LEqual (T_0, 0x30))
                         {
                             Return (TSD3)
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x31))
+                            If (LEqual (T_0, 0x31))
                             {
                                 Return (TSD2)
                             }
@@ -181,7 +181,7 @@ DefinitionBlock ("SSDT2.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00001000)
                                                     0x24, 
                                                     0x30, 
                                                     0x31
-                                                }, MEQ, _T_0, MTR, Zero, Zero), Ones))
+                                                }, MEQ, T_0, MTR, Zero, Zero), Ones))
                                 {
                                     Return (TSD5)
                                 }
@@ -465,23 +465,23 @@ DefinitionBlock ("SSDT2.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00001000)
             })
             Method (OSDL, 0, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 While (One)
                 {
-                    Store (BID, _T_0)
-                    If (LEqual (_T_0, 0x38))
+                    Store (BID, T_0)
+                    If (LEqual (T_0, 0x38))
                     {
                         Return (OSD4)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x30))
+                        If (LEqual (T_0, 0x30))
                         {
                             Return (OSD3)
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x31))
+                            If (LEqual (T_0, 0x31))
                             {
                                 Return (OSD2)
                             }
@@ -591,10 +591,10 @@ DefinitionBlock ("SSDT2.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00001000)
             })
             Method (TSDD, 0, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 While (One)
                 {
-                    Store (BID, _T_0)
+                    Store (BID, T_0)
                     If (LNotEqual (Match (Package (0x0A)
                                     {
                                         0x80, 
@@ -607,7 +607,7 @@ DefinitionBlock ("SSDT2.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00001000)
                                         0x24, 
                                         0x30, 
                                         0x31
-                                    }, MEQ, _T_0, MTR, Zero, Zero), Ones))
+                                    }, MEQ, T_0, MTR, Zero, Zero), Ones))
                     {
                         Name (TULT, Package (0x11)
                         {
@@ -819,13 +819,13 @@ DefinitionBlock ("SSDT2.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00001000)
 
             Method (OSDD, 0, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 If (LEqual (\_SB.PCI0.LPCB.H_EC.ECAV, One))
                 {
                     While (One)
                     {
-                        Store (BID, _T_0)
-                        If (LEqual (_T_0, 0x30))
+                        Store (BID, T_0)
+                        If (LEqual (T_0, 0x30))
                         {
                             Name (OSD3, Package (0x0A)
                             {
@@ -854,7 +854,7 @@ DefinitionBlock ("SSDT2.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00001000)
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x31))
+                            If (LEqual (T_0, 0x31))
                             {
                                 Name (OSD2, Package (0x09)
                                 {
@@ -881,7 +881,7 @@ DefinitionBlock ("SSDT2.aml", "SSDT", 2, "ACRSYS", "ACRPRDCT", 0x00001000)
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x38))
+                                If (LEqual (T_0, 0x38))
                                 {
                                     Name (OSD4, Package (0x05)
                                     {

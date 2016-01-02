@@ -25,9 +25,6 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
      * External declarations that were imported from
      * the reference file [refs.txt]
      */
-    External (_SB_.PCI0.LPCB.H_EC.ECRD, MethodObj)    // 1 Arguments
-    External (_SB_.PCI0.LPCB.H_EC.ECWT, MethodObj)    // 2 Arguments
-    External (_SB_.PCI0.PEG0.PEGP.SGPO, MethodObj)    // 2 Arguments
 
     External (_SB_.PCI0, DeviceObj)
     External (_SB_.PCI0.LPCB.EC0_.BTAT, FieldUnitObj)
@@ -38,6 +35,10 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
     External (_SB_.PCI0.LPCB.EC0_.WLAT, FieldUnitObj)
     External (_SB_.PCI0.LPCB.EC0_.WLEX, FieldUnitObj)
     External (SSMP, FieldUnitObj)
+
+    External (_SB_.PCI0.LPCB.H_EC.ECRD, MethodObj)    // 1 Arguments
+    External (_SB_.PCI0.LPCB.H_EC.ECWT, MethodObj)    // 2 Arguments
+    External (_SB_.PCI0.PEG0.PEGP.SGPO, MethodObj)    // 2 Arguments
 
     Scope (\_SB.PCI0)
     {
@@ -547,13 +548,13 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
 
             Method (GOTS, 2, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 Store (Zero, Local0)
                 Store (And (Arg0, 0xFF), Local1)
                 While (One)
                 {
-                    Store (Local1, _T_0)
-                    If (LEqual (_T_0, 0x83))
+                    Store (Local1, T_0)
+                    If (LEqual (T_0, 0x83))
                     {
                         If (LNot (\_SB.PCI0.LPCB.EC0.TOUP))
                         {
@@ -562,7 +563,7 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x85))
+                        If (LEqual (T_0, 0x85))
                         {
                             If (\_SB.PCI0.LPCB.EC0.KBLK)
                             {
@@ -1583,20 +1584,20 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
             })
             Method (WMAA, 3, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 Store (0x4141, CTID)
                 WSMI (Arg1, Arg2)
                 While (One)
                 {
-                    Store (ToInteger (Arg1), _T_0)
-                    If (LEqual (_T_0, One))
+                    Store (ToInteger (Arg1), T_0)
+                    If (LEqual (T_0, One))
                     {
                         Store (WMIB, AAST)
                         Return (AAST)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x02))
+                        If (LEqual (T_0, 0x02))
                         {
                             Store (WMIB, AAGT)
                             Return (AAGT)
@@ -1611,20 +1612,20 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
 
             Method (WMAB, 3, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 Store (0x4241, CTID)
                 WSMI (Arg1, Arg2)
                 While (One)
                 {
-                    Store (ToInteger (Arg1), _T_0)
-                    If (LEqual (_T_0, One))
+                    Store (ToInteger (Arg1), T_0)
+                    If (LEqual (T_0, One))
                     {
                         Store (WMIB, ABST)
                         Return (ABST)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x02))
+                        If (LEqual (T_0, 0x02))
                         {
                             Store (WMIB, ABGT)
                             Return (ABGT)
@@ -1639,13 +1640,13 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
 
             Method (WMBE, 3, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 Store (0x4542, CTID)
                 WSMI (Arg1, Arg2)
                 While (One)
                 {
-                    Store (ToInteger (Arg1), _T_0)
-                    If (LEqual (_T_0, 0x13))
+                    Store (ToInteger (Arg1), T_0)
+                    If (LEqual (T_0, 0x13))
                     {
                         Store (WMIB, BEBI)
                         Return (BEBI)
@@ -1660,118 +1661,118 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
 
             Method (WMBK, 3, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 Store (0x4B42, CTID)
                 WSMI (Arg1, Arg2)
                 While (One)
                 {
-                    Store (ToInteger (Arg1), _T_0)
-                    If (LEqual (_T_0, One))
+                    Store (ToInteger (Arg1), T_0)
+                    If (LEqual (T_0, One))
                     {
                         Store (WMIB, BKCP)
                         Return (BKCP)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x02))
+                        If (LEqual (T_0, 0x02))
                         {
                             Store (WMIB, BKCP)
                             Return (BKCP)
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x03))
+                            If (LEqual (T_0, 0x03))
                             {
                                 Store (WMIB, BKCP)
                                 Return (BKCP)
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x08))
+                                If (LEqual (T_0, 0x08))
                                 {
                                     Store (WMIB, BKMN)
                                     Return (BKMN)
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x09))
+                                    If (LEqual (T_0, 0x09))
                                     {
                                         Store (WMIB, BKSN)
                                         Return (BKSN)
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x0A))
+                                        If (LEqual (T_0, 0x0A))
                                         {
                                             Store (WMIB, BKAT)
                                             Return (BKAT)
                                         }
                                         Else
                                         {
-                                            If (LEqual (_T_0, 0x0B))
+                                            If (LEqual (T_0, 0x0B))
                                             {
                                                 Store (WMIB, BKSB)
                                                 Return (BKSB)
                                             }
                                             Else
                                             {
-                                                If (LEqual (_T_0, 0x0D))
+                                                If (LEqual (T_0, 0x0D))
                                                 {
                                                     Store (WMIB, BKSB)
                                                     Return (BKSB)
                                                 }
                                                 Else
                                                 {
-                                                    If (LEqual (_T_0, 0x10))
+                                                    If (LEqual (T_0, 0x10))
                                                     {
                                                         Store (WMIB, BKGB)
                                                         Return (BKGB)
                                                     }
                                                     Else
                                                     {
-                                                        If (LEqual (_T_0, 0x11))
+                                                        If (LEqual (T_0, 0x11))
                                                         {
                                                             Store (WMIB, BKSB)
                                                             Return (BKSB)
                                                         }
                                                         Else
                                                         {
-                                                            If (LEqual (_T_0, 0x12))
+                                                            If (LEqual (T_0, 0x12))
                                                             {
                                                                 Store (WMIB, BKCP)
                                                                 Return (BKCP)
                                                             }
                                                             Else
                                                             {
-                                                                If (LEqual (_T_0, 0x13))
+                                                                If (LEqual (T_0, 0x13))
                                                                 {
                                                                     Store (WMIB, BKCP)
                                                                     Return (BKCP)
                                                                 }
                                                                 Else
                                                                 {
-                                                                    If (LEqual (_T_0, 0x14))
+                                                                    If (LEqual (T_0, 0x14))
                                                                     {
                                                                         Store (WMIB, BKGU)
                                                                         Return (BKGU)
                                                                     }
                                                                     Else
                                                                     {
-                                                                        If (LEqual (_T_0, 0x15))
+                                                                        If (LEqual (T_0, 0x15))
                                                                         {
                                                                             Store (WMIB, BKSU)
                                                                             Return (BKSU)
                                                                         }
                                                                         Else
                                                                         {
-                                                                            If (LEqual (_T_0, 0x16))
+                                                                            If (LEqual (T_0, 0x16))
                                                                             {
                                                                                 Store (WMIB, BKGS)
                                                                                 Return (BKGS)
                                                                             }
                                                                             Else
                                                                             {
-                                                                                If (LEqual (_T_0, 0x17))
+                                                                                If (LEqual (T_0, 0x17))
                                                                                 {
                                                                                     Store (WMIB, BKSS)
                                                                                     Return (BKSS)
@@ -1800,62 +1801,62 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
 
             Method (WMBL, 3, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 Store (0x4C42, CTID)
                 WSMI (Arg1, Arg2)
                 While (One)
                 {
-                    Store (ToInteger (Arg1), _T_0)
-                    If (LEqual (_T_0, One))
+                    Store (ToInteger (Arg1), T_0)
+                    If (LEqual (T_0, One))
                     {
                         Store (WMIB, BLCP)
                         Return (BLCP)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x02))
+                        If (LEqual (T_0, 0x02))
                         {
                             Store (WMIB, BLSP)
                             Return (BLSP)
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x03))
+                            If (LEqual (T_0, 0x03))
                             {
                                 Store (WMIB, BLGB)
                                 Return (BLGB)
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x04))
+                                If (LEqual (T_0, 0x04))
                                 {
                                     Store (WMIB, BLSP)
                                     Return (BLSP)
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x05))
+                                    If (LEqual (T_0, 0x05))
                                     {
                                         Store (WMIB, BLSP)
                                         Return (BLSP)
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x06))
+                                        If (LEqual (T_0, 0x06))
                                         {
                                             Store (WMIB, BLLB)
                                             Return (BLLB)
                                         }
                                         Else
                                         {
-                                            If (LEqual (_T_0, 0x07))
+                                            If (LEqual (T_0, 0x07))
                                             {
                                                 Store (WMIB, BLSD)
                                                 Return (BLSD)
                                             }
                                             Else
                                             {
-                                                If (LEqual (_T_0, 0x08))
+                                                If (LEqual (T_0, 0x08))
                                                 {
                                                     Store (WMIB, BLGD)
                                                     Return (BLGD)
@@ -1876,13 +1877,13 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
 
             Method (WMBG, 3, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 Store (0x4742, CTID)
                 WSMI (Arg1, Arg2)
                 While (One)
                 {
-                    Store (ToInteger (Arg1), _T_0)
-                    If (LEqual (_T_0, One))
+                    Store (ToInteger (Arg1), T_0)
+                    If (LEqual (T_0, One))
                     {
                         Store (WMIB, BGS3)
                         Return (BGS3)
@@ -1896,12 +1897,12 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
 
             Method (EVBC, 0, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 Store (DerefOf (Index (FEBC, Zero)), Local0)
                 While (One)
                 {
-                    Store (ToInteger (Local0), _T_0)
-                    If (LEqual (_T_0, One))
+                    Store (ToInteger (Local0), T_0)
+                    If (LEqual (T_0, One))
                     {
                         CLBC (0x04, 0x04)
                         Store (DerefOf (Index (FEBC, One)), Local1)
@@ -1945,19 +1946,19 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
                     }
                     Else
                     {
-                        If (LEqual (_T_0, 0x02))
+                        If (LEqual (T_0, 0x02))
                         {
                             CLBC (0x02, 0x06)
                         }
                         Else
                         {
-                            If (LEqual (_T_0, 0x03))
+                            If (LEqual (T_0, 0x03))
                             {
                                 CLBC (0x02, 0x06)
                             }
                             Else
                             {
-                                If (LEqual (_T_0, 0x04))
+                                If (LEqual (T_0, 0x04))
                                 {
                                     CLBC (0x03, 0x05)
                                     Store (Zero, Local1)
@@ -1982,7 +1983,7 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
                                 }
                                 Else
                                 {
-                                    If (LEqual (_T_0, 0x05))
+                                    If (LEqual (T_0, 0x05))
                                     {
                                         Store (Zero, Local1)
                                         Store (GSTY (RefOf (Local1)), Local3)
@@ -2013,7 +2014,7 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
                                     }
                                     Else
                                     {
-                                        If (LEqual (_T_0, 0x06))
+                                        If (LEqual (T_0, 0x06))
                                         {
                                             CLBC (0x03, 0x05)
                                             Store (Zero, Local1)
@@ -2055,12 +2056,12 @@ DefinitionBlock ("SSDT1.aml", "SSDT", 1, "ACRSYS", "ACRPRDCT", 0x00001000)
 
             Method (EVBD, 0, Serialized)
             {
-                Name (_T_0, Zero)  // _T_x: Emitted by ASL Compiler
+                Name (T_0, Zero)  // _T_x: Emitted by ASL Compiler
                 Store (DerefOf (Index (FEBC, Zero)), Local0)
                 While (One)
                 {
-                    Store (ToInteger (Local0), _T_0)
-                    If (LEqual (_T_0, One))
+                    Store (ToInteger (Local0), T_0)
+                    If (LEqual (T_0, One))
                     {
                         CLBC (0x02, 0x06)
                     }

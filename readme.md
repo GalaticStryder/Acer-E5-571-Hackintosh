@@ -40,6 +40,10 @@ You'll find all hardware related stuff in **information** folder. The basic hard
 - Realtek RTL8111/8168/8411 Ethernet Controller
 - QCA9565 / AR9565 Wireless Network Adapter
 
+**Screenshot:**
+
+[ANXI Hardware](information/anxi.png)
+
 Instructions
 -------------------------
 

@@ -1,0 +1,2 @@
+[0:0:0:0]    disk    ATA      WDC WD10JPVX-22J 1A01  /dev/sda 
+[1:0:0:0]    cd/dvd  HL-DT-ST DVDRAM GUC0N     1.00  /dev/sr0 

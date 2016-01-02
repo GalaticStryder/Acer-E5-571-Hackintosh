@@ -81,9 +81,9 @@ Cortesy of RehabMan at [BitBucket](https://bitbucket.org/RehabMan/acpica/downloa
 
 Proceed to **dsl** generation after the previous step.
 
-        cd dsdt
-        mkdir dsl
-        cd original
+	cd dsdt
+	mkdir dsl
+	cd original
 
 First create a refs.txt with the following content:
 
@@ -104,51 +104,60 @@ Don't get confused with dsl folder and extension, ok?
 
 After that you're aheading that neck to DSDT patching/fixing on **MaciASL app**. As for this laptop I added the following repos on it:
 
-Name | URL link
-Pjalm | http://pjalm.com/repos/intel9/
-RehabMan | http://raw.github.com/RehabMan/Laptop-DSDT-Patch/master
+|      Name     |   URL Link    |
+| ------------- | ------------- |
+| Pjalm     | http://pjalm.com/repos/intel9/  |
+| RehabMan  | http://raw.github.com/RehabMan/Laptop-DSDT-Patch/master |
 
 The stock ones have a patch that we need, only one though so don't delete them.
 
 I'm following Asus ZenBook (Broadwell as well) thread at tonymac for some of these steps cause as I said, close specs close settings, this UX303LA has a close setup with a few extras we don't need.
+
 [Check the thread there.](http://www.tonymacx86.com/el-capitan-laptop-guides/172279-guide-asus-zenbook-ux303la-broadwell-edition.html)
+
 [Another thread I'm following for this project is RehabMan's one.](http://www.tonymacx86.com/el-capitan-laptop-support/152573-guide-patching-laptop-dsdt-ssdts.html)
 
 Following them we'll use the following patches for **DSDT.dsl.**
 
-RehabMan's:
+**RehabMan's:**
 
-Remove _DSM methods
-Audio Layout 12
-Fix _WAK Arg0 v2
-HPET Fix
-IRQ Fix
-RTC Fix
-Fix PNOT/PPNT
-Add IMEI
-Fix ADGB Error
-Brightness fix Haswell
-Rename GFX0 to IGPU
-Rename B0D3 to HDAU
+- Remove _DSM methods
+- Audio Layout 12
+- Fix _WAK Arg0 v2
+- HPET Fix
+- IRQ Fix
+- RTC Fix
+- Fix PNOT/PPNT
+- Add IMEI
+- Fix ADGB Error
+- Brightness fix Haswell
+- Rename GFX0 to IGPU
+- Rename B0D3 to HDAU
 
-Pjalm's:
+**Pjalm's:**
 
-Generic Fixes
-LPC
-SMBus
+- Generic Fixes
+- LPC
+- SMBus
 
 Following them we'll use the following patches for **SSDTx.dsl.**
 
 Note: Every SSDT is related to one or more components, you can get a clue at left panel name when opening it in MaciASL.
+
 I needed to patch 4/9 or 5/9 SSDTs, some of them compile just fine without any patch needed, but...
 
-Generic Fixes (Pjalm)
-DTGP (SourceForge)
-Rename GFX0 to IGPU, rename B0D3 to HDAU and remove _PSS placeholders (Rehab)
+- Generic Fixes (Pjalm)
+- DTGP (SourceForge)
+- Rename GFX0 to IGPU (Rehab)
+- Rename B0D3 to HDAU (Rahab)
+- Remove _PSS placeholders (Rehab)
 
-Other compiling issues:
+**Other compiling issues:**
+
 Operator has no effect: 5c46b2ef43d6cd73f862d6c0eb58bea3c6d8d637 - Searched on Google
+
 Audio 12: c626185870a80038bf09026bbbc531e1f45d1736 - [Machanical](http://www.tonymacx86.com/members/machanical/)
+
 Many errors can be fault of External declarations, to sort that out just **cut** The three main external lines that have "1 arguments" or "2 arguments" comment to the bottom of the other external ones with one line space optionally. - [Machanical](http://www.tonymacx86.com/members/machanical/)
 
 That's a click compile and adjust job. After the solving all errors in all DSDT you've got to save as **.aml** back again, all of them. Put the saved ones (aml) in compiled one by one.

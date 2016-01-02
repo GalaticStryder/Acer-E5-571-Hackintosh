@@ -1,0 +1,720 @@
+Intel ACPI Component Architecture
+ASL+ Optimizing Compiler version 20141107-64 [Jan  2 2015]
+Copyright (c) 2000 - 2014 Intel Corporation
+
+Loading Acpi table from file   DSDT.aml - Length 00080596 (013AD4)
+ACPI: DSDT 0x0000000000000000 013AD4 (v02 ACRSYS ACRPRDCT 00000000 1025 00040000)
+Acpi table [DSDT] successfully installed and loaded
+Loading Acpi table from file  SSDT9.aml - Length 00000281 (000119)
+ACPI: SSDT 0x0000000000000000 000119 (v02 PmRef  ApCst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT8.aml - Length 00001450 (0005AA)
+ACPI: SSDT 0x0000000000000000 0005AA (v02 PmRef  ApIst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT7.aml - Length 00000979 (0003D3)
+ACPI: SSDT 0x0000000000000000 0003D3 (v02 PmRef  Cpu0Cst  00003001 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT6.aml - Length 00025188 (006264)
+ACPI: SSDT 0x0000000000000000 006264 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT5.aml - Length 00002932 (000B74)
+ACPI: SSDT 0x0000000000000000 000B74 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT4.aml - Length 00001337 (000539)
+ACPI: SSDT 0x0000000000000000 000539 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT3.aml - Length 00003027 (000BD3)
+ACPI: SSDT 0x0000000000000000 000BD3 (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT2.aml - Length 00013359 (00342F)
+ACPI: SSDT 0x0000000000000000 00342F (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT1.aml - Length 00015992 (003E78)
+ACPI: SSDT 0x0000000000000000 003E78 (v01 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.PEG0.PEGP.SGPO
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.LPCB.H_EC.ECWT
+refs.txt: Importing method external (1 arguments) _SB_.PCI0.LPCB.H_EC.ECRD
+refs.txt: Imported 3 external method definitions
+Pass 1 parse of [DSDT]
+Pass 2 parse of [DSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+
+Found 23 external control methods, reparsing with new information
+Pass 1 parse of [DSDT]
+Pass 2 parse of [DSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+Disassembly completed
+ASL Output:    DSDT.dsl - 675320 bytes
+
+iASL Warning: There were 23 external control methods found during
+disassembly, but only 13 were resolved (10 unresolved). Additional
+ACPI tables may be required to properly disassemble the code. The
+resulting disassembler output file may not compile because the
+disassembler did not know how many arguments to assign to the
+unresolved methods.
+
+If necessary, the -fe option can be used to specify a file containing
+control method external declarations with the associated method
+argument counts. Each line of the file must be of the form:
+    External (<method pathname>, MethodObj, <argument count>)
+Invocation:
+    iasl -fe refs.txt -d dsdt.aml
+Loading Acpi table from file  SSDT1.aml - Length 00015992 (003E78)
+ACPI: SSDT 0x0000000000000000 003E78 (v01 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Loading Acpi table from file  SSDT9.aml - Length 00000281 (000119)
+ACPI: SSDT 0x0000000000000000 000119 (v02 PmRef  ApCst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT8.aml - Length 00001450 (0005AA)
+ACPI: SSDT 0x0000000000000000 0005AA (v02 PmRef  ApIst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT7.aml - Length 00000979 (0003D3)
+ACPI: SSDT 0x0000000000000000 0003D3 (v02 PmRef  Cpu0Cst  00003001 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT6.aml - Length 00025188 (006264)
+ACPI: SSDT 0x0000000000000000 006264 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT5.aml - Length 00002932 (000B74)
+ACPI: SSDT 0x0000000000000000 000B74 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT4.aml - Length 00001337 (000539)
+ACPI: SSDT 0x0000000000000000 000539 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT3.aml - Length 00003027 (000BD3)
+ACPI: SSDT 0x0000000000000000 000BD3 (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT2.aml - Length 00013359 (00342F)
+ACPI: SSDT 0x0000000000000000 00342F (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file   DSDT.aml - Length 00080596 (013AD4)
+ACPI: DSDT 0x0000000000000000 013AD4 (v02 ACRSYS ACRPRDCT 00000000 1025 00040000)
+Acpi table [DSDT] successfully installed and loaded
+Pass 1 parse of [DSDT]
+Pass 2 parse of [DSDT]
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.PEG0.PEGP.SGPO
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.LPCB.H_EC.ECWT
+refs.txt: Importing method external (1 arguments) _SB_.PCI0.LPCB.H_EC.ECRD
+refs.txt: Imported 3 external method definitions
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+
+Found 3 external control methods, reparsing with new information
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+Disassembly completed
+ASL Output:    SSDT1.dsl - 158921 bytes
+Loading Acpi table from file  SSDT2.aml - Length 00013359 (00342F)
+ACPI: SSDT 0x0000000000000000 00342F (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Loading Acpi table from file  SSDT9.aml - Length 00000281 (000119)
+ACPI: SSDT 0x0000000000000000 000119 (v02 PmRef  ApCst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT8.aml - Length 00001450 (0005AA)
+ACPI: SSDT 0x0000000000000000 0005AA (v02 PmRef  ApIst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT7.aml - Length 00000979 (0003D3)
+ACPI: SSDT 0x0000000000000000 0003D3 (v02 PmRef  Cpu0Cst  00003001 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT6.aml - Length 00025188 (006264)
+ACPI: SSDT 0x0000000000000000 006264 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT5.aml - Length 00002932 (000B74)
+ACPI: SSDT 0x0000000000000000 000B74 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT4.aml - Length 00001337 (000539)
+ACPI: SSDT 0x0000000000000000 000539 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT3.aml - Length 00003027 (000BD3)
+ACPI: SSDT 0x0000000000000000 000BD3 (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT1.aml - Length 00015992 (003E78)
+ACPI: SSDT 0x0000000000000000 003E78 (v01 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file   DSDT.aml - Length 00080596 (013AD4)
+ACPI: DSDT 0x0000000000000000 013AD4 (v02 ACRSYS ACRPRDCT 00000000 1025 00040000)
+Acpi table [DSDT] successfully installed and loaded
+Pass 1 parse of [DSDT]
+Pass 2 parse of [DSDT]
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.PEG0.PEGP.SGPO
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.LPCB.H_EC.ECWT
+refs.txt: Importing method external (1 arguments) _SB_.PCI0.LPCB.H_EC.ECRD
+refs.txt: Imported 3 external method definitions
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+
+Found 6 external control methods, reparsing with new information
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+Disassembly completed
+ASL Output:    SSDT2.dsl - 49225 bytes
+
+iASL Warning: There were 6 external control methods found during
+disassembly, but only 5 were resolved (1 unresolved). Additional
+ACPI tables may be required to properly disassemble the code. The
+resulting disassembler output file may not compile because the
+disassembler did not know how many arguments to assign to the
+unresolved methods.
+
+If necessary, the -fe option can be used to specify a file containing
+control method external declarations with the associated method
+argument counts. Each line of the file must be of the form:
+    External (<method pathname>, MethodObj, <argument count>)
+Invocation:
+    iasl -fe refs.txt -d dsdt.aml
+Loading Acpi table from file  SSDT3.aml - Length 00003027 (000BD3)
+ACPI: SSDT 0x0000000000000000 000BD3 (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Loading Acpi table from file  SSDT9.aml - Length 00000281 (000119)
+ACPI: SSDT 0x0000000000000000 000119 (v02 PmRef  ApCst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT8.aml - Length 00001450 (0005AA)
+ACPI: SSDT 0x0000000000000000 0005AA (v02 PmRef  ApIst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT7.aml - Length 00000979 (0003D3)
+ACPI: SSDT 0x0000000000000000 0003D3 (v02 PmRef  Cpu0Cst  00003001 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT6.aml - Length 00025188 (006264)
+ACPI: SSDT 0x0000000000000000 006264 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT5.aml - Length 00002932 (000B74)
+ACPI: SSDT 0x0000000000000000 000B74 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT4.aml - Length 00001337 (000539)
+ACPI: SSDT 0x0000000000000000 000539 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT2.aml - Length 00013359 (00342F)
+ACPI: SSDT 0x0000000000000000 00342F (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT1.aml - Length 00015992 (003E78)
+ACPI: SSDT 0x0000000000000000 003E78 (v01 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file   DSDT.aml - Length 00080596 (013AD4)
+ACPI: DSDT 0x0000000000000000 013AD4 (v02 ACRSYS ACRPRDCT 00000000 1025 00040000)
+Acpi table [DSDT] successfully installed and loaded
+Pass 1 parse of [DSDT]
+Pass 2 parse of [DSDT]
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.PEG0.PEGP.SGPO
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.LPCB.H_EC.ECWT
+refs.txt: Importing method external (1 arguments) _SB_.PCI0.LPCB.H_EC.ECRD
+refs.txt: Imported 3 external method definitions
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+
+Found 4 external control methods, reparsing with new information
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+Disassembly completed
+ASL Output:    SSDT3.dsl - 18823 bytes
+
+iASL Warning: There were 4 external control methods found during
+disassembly, but only 3 were resolved (1 unresolved). Additional
+ACPI tables may be required to properly disassemble the code. The
+resulting disassembler output file may not compile because the
+disassembler did not know how many arguments to assign to the
+unresolved methods.
+
+If necessary, the -fe option can be used to specify a file containing
+control method external declarations with the associated method
+argument counts. Each line of the file must be of the form:
+    External (<method pathname>, MethodObj, <argument count>)
+Invocation:
+    iasl -fe refs.txt -d dsdt.aml
+Loading Acpi table from file  SSDT4.aml - Length 00001337 (000539)
+ACPI: SSDT 0x0000000000000000 000539 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Loading Acpi table from file  SSDT9.aml - Length 00000281 (000119)
+ACPI: SSDT 0x0000000000000000 000119 (v02 PmRef  ApCst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT8.aml - Length 00001450 (0005AA)
+ACPI: SSDT 0x0000000000000000 0005AA (v02 PmRef  ApIst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT7.aml - Length 00000979 (0003D3)
+ACPI: SSDT 0x0000000000000000 0003D3 (v02 PmRef  Cpu0Cst  00003001 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT6.aml - Length 00025188 (006264)
+ACPI: SSDT 0x0000000000000000 006264 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT5.aml - Length 00002932 (000B74)
+ACPI: SSDT 0x0000000000000000 000B74 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT3.aml - Length 00003027 (000BD3)
+ACPI: SSDT 0x0000000000000000 000BD3 (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT2.aml - Length 00013359 (00342F)
+ACPI: SSDT 0x0000000000000000 00342F (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT1.aml - Length 00015992 (003E78)
+ACPI: SSDT 0x0000000000000000 003E78 (v01 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file   DSDT.aml - Length 00080596 (013AD4)
+ACPI: DSDT 0x0000000000000000 013AD4 (v02 ACRSYS ACRPRDCT 00000000 1025 00040000)
+Acpi table [DSDT] successfully installed and loaded
+Pass 1 parse of [DSDT]
+Pass 2 parse of [DSDT]
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.PEG0.PEGP.SGPO
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.LPCB.H_EC.ECWT
+refs.txt: Importing method external (1 arguments) _SB_.PCI0.LPCB.H_EC.ECRD
+refs.txt: Imported 3 external method definitions
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+
+Found 3 external control methods, reparsing with new information
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+Disassembly completed
+ASL Output:    SSDT4.dsl - 10046 bytes
+Loading Acpi table from file  SSDT5.aml - Length 00002932 (000B74)
+ACPI: SSDT 0x0000000000000000 000B74 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Loading Acpi table from file  SSDT9.aml - Length 00000281 (000119)
+ACPI: SSDT 0x0000000000000000 000119 (v02 PmRef  ApCst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT8.aml - Length 00001450 (0005AA)
+ACPI: SSDT 0x0000000000000000 0005AA (v02 PmRef  ApIst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT7.aml - Length 00000979 (0003D3)
+ACPI: SSDT 0x0000000000000000 0003D3 (v02 PmRef  Cpu0Cst  00003001 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT6.aml - Length 00025188 (006264)
+ACPI: SSDT 0x0000000000000000 006264 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT4.aml - Length 00001337 (000539)
+ACPI: SSDT 0x0000000000000000 000539 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT3.aml - Length 00003027 (000BD3)
+ACPI: SSDT 0x0000000000000000 000BD3 (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT2.aml - Length 00013359 (00342F)
+ACPI: SSDT 0x0000000000000000 00342F (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT1.aml - Length 00015992 (003E78)
+ACPI: SSDT 0x0000000000000000 003E78 (v01 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file   DSDT.aml - Length 00080596 (013AD4)
+ACPI: DSDT 0x0000000000000000 013AD4 (v02 ACRSYS ACRPRDCT 00000000 1025 00040000)
+Acpi table [DSDT] successfully installed and loaded
+Pass 1 parse of [DSDT]
+Pass 2 parse of [DSDT]
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.PEG0.PEGP.SGPO
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.LPCB.H_EC.ECWT
+refs.txt: Importing method external (1 arguments) _SB_.PCI0.LPCB.H_EC.ECRD
+refs.txt: Imported 3 external method definitions
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+
+Found 3 external control methods, reparsing with new information
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+Disassembly completed
+ASL Output:    SSDT5.dsl - 16011 bytes
+Loading Acpi table from file  SSDT6.aml - Length 00025188 (006264)
+ACPI: SSDT 0x0000000000000000 006264 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Loading Acpi table from file  SSDT9.aml - Length 00000281 (000119)
+ACPI: SSDT 0x0000000000000000 000119 (v02 PmRef  ApCst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT8.aml - Length 00001450 (0005AA)
+ACPI: SSDT 0x0000000000000000 0005AA (v02 PmRef  ApIst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT7.aml - Length 00000979 (0003D3)
+ACPI: SSDT 0x0000000000000000 0003D3 (v02 PmRef  Cpu0Cst  00003001 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT5.aml - Length 00002932 (000B74)
+ACPI: SSDT 0x0000000000000000 000B74 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT4.aml - Length 00001337 (000539)
+ACPI: SSDT 0x0000000000000000 000539 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT3.aml - Length 00003027 (000BD3)
+ACPI: SSDT 0x0000000000000000 000BD3 (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT2.aml - Length 00013359 (00342F)
+ACPI: SSDT 0x0000000000000000 00342F (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT1.aml - Length 00015992 (003E78)
+ACPI: SSDT 0x0000000000000000 003E78 (v01 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file   DSDT.aml - Length 00080596 (013AD4)
+ACPI: DSDT 0x0000000000000000 013AD4 (v02 ACRSYS ACRPRDCT 00000000 1025 00040000)
+Acpi table [DSDT] successfully installed and loaded
+Pass 1 parse of [DSDT]
+Pass 2 parse of [DSDT]
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.PEG0.PEGP.SGPO
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.LPCB.H_EC.ECWT
+refs.txt: Importing method external (1 arguments) _SB_.PCI0.LPCB.H_EC.ECRD
+refs.txt: Imported 3 external method definitions
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+
+Found 13 external control methods, reparsing with new information
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+Disassembly completed
+ASL Output:    SSDT6.dsl - 182895 bytes
+
+iASL Warning: There were 13 external control methods found during
+disassembly, but only 11 were resolved (2 unresolved). Additional
+ACPI tables may be required to properly disassemble the code. The
+resulting disassembler output file may not compile because the
+disassembler did not know how many arguments to assign to the
+unresolved methods.
+
+If necessary, the -fe option can be used to specify a file containing
+control method external declarations with the associated method
+argument counts. Each line of the file must be of the form:
+    External (<method pathname>, MethodObj, <argument count>)
+Invocation:
+    iasl -fe refs.txt -d dsdt.aml
+Loading Acpi table from file  SSDT7.aml - Length 00000979 (0003D3)
+ACPI: SSDT 0x0000000000000000 0003D3 (v02 PmRef  Cpu0Cst  00003001 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Loading Acpi table from file  SSDT9.aml - Length 00000281 (000119)
+ACPI: SSDT 0x0000000000000000 000119 (v02 PmRef  ApCst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT8.aml - Length 00001450 (0005AA)
+ACPI: SSDT 0x0000000000000000 0005AA (v02 PmRef  ApIst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT6.aml - Length 00025188 (006264)
+ACPI: SSDT 0x0000000000000000 006264 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT5.aml - Length 00002932 (000B74)
+ACPI: SSDT 0x0000000000000000 000B74 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT4.aml - Length 00001337 (000539)
+ACPI: SSDT 0x0000000000000000 000539 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT3.aml - Length 00003027 (000BD3)
+ACPI: SSDT 0x0000000000000000 000BD3 (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT2.aml - Length 00013359 (00342F)
+ACPI: SSDT 0x0000000000000000 00342F (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT1.aml - Length 00015992 (003E78)
+ACPI: SSDT 0x0000000000000000 003E78 (v01 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file   DSDT.aml - Length 00080596 (013AD4)
+ACPI: DSDT 0x0000000000000000 013AD4 (v02 ACRSYS ACRPRDCT 00000000 1025 00040000)
+Acpi table [DSDT] successfully installed and loaded
+Pass 1 parse of [DSDT]
+Pass 2 parse of [DSDT]
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.PEG0.PEGP.SGPO
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.LPCB.H_EC.ECWT
+refs.txt: Importing method external (1 arguments) _SB_.PCI0.LPCB.H_EC.ECRD
+refs.txt: Imported 3 external method definitions
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+
+Found 3 external control methods, reparsing with new information
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+Disassembly completed
+ASL Output:    SSDT7.dsl - 8092 bytes
+Loading Acpi table from file  SSDT8.aml - Length 00001450 (0005AA)
+ACPI: SSDT 0x0000000000000000 0005AA (v02 PmRef  ApIst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Loading Acpi table from file  SSDT9.aml - Length 00000281 (000119)
+ACPI: SSDT 0x0000000000000000 000119 (v02 PmRef  ApCst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT7.aml - Length 00000979 (0003D3)
+ACPI: SSDT 0x0000000000000000 0003D3 (v02 PmRef  Cpu0Cst  00003001 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT6.aml - Length 00025188 (006264)
+ACPI: SSDT 0x0000000000000000 006264 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT5.aml - Length 00002932 (000B74)
+ACPI: SSDT 0x0000000000000000 000B74 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT4.aml - Length 00001337 (000539)
+ACPI: SSDT 0x0000000000000000 000539 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT3.aml - Length 00003027 (000BD3)
+ACPI: SSDT 0x0000000000000000 000BD3 (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT2.aml - Length 00013359 (00342F)
+ACPI: SSDT 0x0000000000000000 00342F (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT1.aml - Length 00015992 (003E78)
+ACPI: SSDT 0x0000000000000000 003E78 (v01 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file   DSDT.aml - Length 00080596 (013AD4)
+ACPI: DSDT 0x0000000000000000 013AD4 (v02 ACRSYS ACRPRDCT 00000000 1025 00040000)
+Acpi table [DSDT] successfully installed and loaded
+Pass 1 parse of [DSDT]
+Pass 2 parse of [DSDT]
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.PEG0.PEGP.SGPO
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.LPCB.H_EC.ECWT
+refs.txt: Importing method external (1 arguments) _SB_.PCI0.LPCB.H_EC.ECRD
+refs.txt: Imported 3 external method definitions
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+
+Found 4 external control methods, reparsing with new information
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+Disassembly completed
+ASL Output:    SSDT8.dsl - 11060 bytes
+Loading Acpi table from file  SSDT9.aml - Length 00000281 (000119)
+ACPI: SSDT 0x0000000000000000 000119 (v02 PmRef  ApCst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Loading Acpi table from file  SSDT8.aml - Length 00001450 (0005AA)
+ACPI: SSDT 0x0000000000000000 0005AA (v02 PmRef  ApIst    00003000 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT7.aml - Length 00000979 (0003D3)
+ACPI: SSDT 0x0000000000000000 0003D3 (v02 PmRef  Cpu0Cst  00003001 INTL 20120913)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT6.aml - Length 00025188 (006264)
+ACPI: SSDT 0x0000000000000000 006264 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT5.aml - Length 00002932 (000B74)
+ACPI: SSDT 0x0000000000000000 000B74 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT4.aml - Length 00001337 (000539)
+ACPI: SSDT 0x0000000000000000 000539 (v02 ACRSYS ACRPRDCT 00003000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT3.aml - Length 00003027 (000BD3)
+ACPI: SSDT 0x0000000000000000 000BD3 (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT2.aml - Length 00013359 (00342F)
+ACPI: SSDT 0x0000000000000000 00342F (v02 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file  SSDT1.aml - Length 00015992 (003E78)
+ACPI: SSDT 0x0000000000000000 003E78 (v01 ACRSYS ACRPRDCT 00001000 1025 00040000)
+Acpi table [SSDT] successfully installed and loaded
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Loading Acpi table from file   DSDT.aml - Length 00080596 (013AD4)
+ACPI: DSDT 0x0000000000000000 013AD4 (v02 ACRSYS ACRPRDCT 00000000 1025 00040000)
+Acpi table [DSDT] successfully installed and loaded
+Pass 1 parse of [DSDT]
+Pass 2 parse of [DSDT]
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.PEG0.PEGP.SGPO
+refs.txt: Importing method external (2 arguments) _SB_.PCI0.LPCB.H_EC.ECWT
+refs.txt: Importing method external (1 arguments) _SB_.PCI0.LPCB.H_EC.ECRD
+refs.txt: Imported 3 external method definitions
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+
+Found 4 external control methods, reparsing with new information
+Pass 1 parse of [SSDT]
+Pass 2 parse of [SSDT]
+Parsing Deferred Opcodes (Methods/Buffers/Packages/Regions)
+
+Parsing completed
+Disassembly completed
+ASL Output:    SSDT9.dsl - 2402 bytes

@@ -1,6 +1,7 @@
 Mac OS X on the Acer Aspire E5-571-376T
 ==========================
 ![Acer Aspire E5-571-376T](http://static.acer.com/up/Resource/Acer/Notebooks/AGW2%20Aspire%20E/Images/20140325/Aspire_E5-571-531-551-521-511_nontouch_black_glare-sku-main.png)
+
 A place/guide for patches that allow booting OSX in the Acer E5-571-376T. Fow now, this repo is under construction (maybe forever), it'll take some time to get something decent as I'm newbie on it (GNU/Linux guy).
 All the processes are generically the same for a hackintosh laptop build (Intel), but DSDT/SSDT patching and some more specific things like kexts and stuff should be device/board particular.
 
@@ -57,7 +58,6 @@ Clone this repository into a development folder if you don't have one.
 
 Proccess to extract DSTD from GNU/Linux:
 
-	mkdir dsdt
 	cd dsdt
 	mkdir original
 	sudo cp -R /sys/firmware/acpi/tables original
@@ -154,13 +154,15 @@ I needed to patch 4/9 or 5/9 SSDTs, some of them compile just fine without any p
 
 **Other compiling issues:**
 
-Operator has no effect: 5c46b2ef43d6cd73f862d6c0eb58bea3c6d8d637 - Searched on Google
+Operator has no effect: https://github.com/GalaticStryder/Acer-E5-571-Hackintosh/commit/5c46b2ef43d6cd73f862d6c0eb58bea3c6d8d637
 
-Audio 12: c626185870a80038bf09026bbbc531e1f45d1736 - [Machanical](http://www.tonymacx86.com/members/machanical/)
+Audio 12: https://github.com/GalaticStryder/Acer-E5-571-Hackintosh/commit/c626185870a80038bf09026bbbc531e1f45d1736
+From [Machanical](http://www.tonymacx86.com/members/machanical/)
 
-Many errors can be fault of External declarations, to sort that out just **cut** The three main external lines that have "1 arguments" or "2 arguments" comment to the bottom of the other external ones with one line space optionally. - [Machanical](http://www.tonymacx86.com/members/machanical/)
+Many errors can be fault of **external declarations**, to sort that out just **cut** the three main external lines that have "1 arguments" or "2 arguments" comment to the bottom of the other external ones with one line space optionally.
+From [Machanical](http://www.tonymacx86.com/members/machanical/)
 
-That's a click compile and adjust job. After the solving all errors in all DSDT you've got to save as **.aml** back again, all of them. Put the saved ones (aml) in compiled one by one.
+That's a click compile and adjust job. After the solving all errors in all DSDT you've got to save as **.aml** back again, all of them. Put the saved ones (aml) in the compiled folder one by one.
 
 After that let's get the real **Clover** setup...
 

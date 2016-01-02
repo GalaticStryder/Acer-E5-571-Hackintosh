@@ -10166,7 +10166,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         }
     }
 
-    Mutex (EHLD, 0x00)
+    Mutex(EHLD, 0)
     Scope (\)
     {
         Device (NFC)
@@ -10247,8 +10247,8 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
         }
     }
 
-    Mutex (MUTX, 0x00)
-    Mutex (OSUM, 0x00)
+    Mutex(MUTX, 0)
+    Mutex(OSUM, 0)
     Event (WFEV)
     Name (H2OE, One)
     Name (P8XE, Zero)
@@ -15993,7 +15993,7 @@ P8XH (One, 0xAB)
                 Offset (0xBD)
             }
 
-            Mutex (FAMX, 0x00)
+            Mutex(FAMX, 0)
             Method (FANG, 1, NotSerialized)
             {
                 Acquire (FAMX, 0xFFFF)
@@ -16096,7 +16096,7 @@ P8XH (One, 0xAB)
                 0x26, 
                 0x17
             })
-            Mutex (CFMX, 0x00)
+            Mutex(CFMX, 0)
             Method (CFUN, 4, Serialized)
             {
                 Name (ESRC, 0x05)
@@ -16254,7 +16254,7 @@ P8XH (One, 0xAB)
                 0x81, 
                 0x82
             })
-            Mutex (PFMX, 0x00)
+            Mutex(PFMX, 0)
             Method (PFUN, 4, Serialized)
             {
                 Acquire (PFMX, 0xFFFF)

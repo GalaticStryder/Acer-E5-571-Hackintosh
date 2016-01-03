@@ -1,0 +1,7 @@
+Attached devices:
+Host: scsi0 Channel: 00 Id: 00 Lun: 00
+  Vendor: ATA      Model: WDC WD10JPVX-22J Rev: 1A01
+  Type:   Direct-Access                    ANSI  SCSI revision: 05
+Host: scsi1 Channel: 00 Id: 00 Lun: 00
+  Vendor: HL-DT-ST Model: DVDRAM GUC0N     Rev: 1.00
+  Type:   CD-ROM                           ANSI  SCSI revision: 05

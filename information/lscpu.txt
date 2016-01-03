@@ -1,0 +1,24 @@
+Arquitetura:           x86_64
+Modo(s) operacional da CPU:32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                4
+On-line CPU(s) list:   0-3
+Thread(s) per núcleo  2
+Núcleo(s) por soquete:2
+Soquete(s):            1
+Nó(s) de NUMA:        1
+ID de fornecedor:      GenuineIntel
+Família da CPU:       6
+Modelo:                61
+Model name:            Intel(R) Core(TM) i3-5005U CPU @ 2.00GHz
+Step:                  4
+CPU MHz:               1999.921
+CPU max MHz:           2000,0000
+CPU min MHz:           500,0000
+BogoMIPS:              3990.56
+Virtualização:       VT-x
+cache de L1d:          32K
+cache de L1i:          32K
+cache de L2:           256K
+cache de L3:           3072K
+NUMA node0 CPU(s):     0-3

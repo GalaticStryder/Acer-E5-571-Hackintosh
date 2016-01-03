@@ -1,0 +1,168 @@
+00:00.0 Host bridge: Intel Corporation Broadwell-U Host Bridge -OPI (rev 09)
+	Subsystem: Acer Incorporated [ALI] Device 0940
+	Flags: bus master, fast devsel, latency 0
+	Capabilities: [e0] Vendor Specific Information: Len=0c <?>
+	Kernel driver in use: bdw_uncore
+
+00:02.0 VGA compatible controller: Intel Corporation Broadwell-U Integrated Graphics (rev 09) (prog-if 00 [VGA controller])
+	Subsystem: Acer Incorporated [ALI] Device 0940
+	Flags: bus master, fast devsel, latency 0, IRQ 49
+	Memory at c0000000 (64-bit, non-prefetchable) [size=16M]
+	Memory at b0000000 (64-bit, prefetchable) [size=256M]
+	I/O ports at 4000 [size=64]
+	Expansion ROM at <unassigned> [disabled]
+	Capabilities: [90] MSI: Enable+ Count=1/1 Maskable- 64bit-
+	Capabilities: [d0] Power Management version 2
+	Capabilities: [a4] PCI Advanced Features
+	Kernel driver in use: i915
+
+00:03.0 Audio device: Intel Corporation Broadwell-U Audio Controller (rev 09)
+	Subsystem: Acer Incorporated [ALI] Device 0940
+	Flags: bus master, fast devsel, latency 0, IRQ 52
+	Memory at c1210000 (64-bit, non-prefetchable) [size=16K]
+	Capabilities: [50] Power Management version 2
+	Capabilities: [60] MSI: Enable+ Count=1/1 Maskable- 64bit-
+	Capabilities: [70] Express Root Complex Integrated Endpoint, MSI 00
+	Kernel driver in use: snd_hda_intel
+
+00:14.0 USB controller: Intel Corporation Wildcat Point-LP USB xHCI Controller (rev 03) (prog-if 30 [XHCI])
+	Subsystem: Acer Incorporated [ALI] Device 0940
+	Flags: bus master, medium devsel, latency 0, IRQ 45
+	Memory at c1200000 (64-bit, non-prefetchable) [size=64K]
+	Capabilities: [70] Power Management version 2
+	Capabilities: [80] MSI: Enable+ Count=1/8 Maskable- 64bit+
+	Kernel driver in use: xhci_hcd
+
+00:16.0 Communication controller: Intel Corporation Wildcat Point-LP MEI Controller #1 (rev 03)
+	Subsystem: Acer Incorporated [ALI] Device 0940
+	Flags: bus master, fast devsel, latency 0, IRQ 50
+	Memory at c1219000 (64-bit, non-prefetchable) [size=32]
+	Capabilities: [50] Power Management version 3
+	Capabilities: [8c] MSI: Enable+ Count=1/1 Maskable- 64bit+
+	Kernel driver in use: mei_me
+
+00:1b.0 Audio device: Intel Corporation Wildcat Point-LP High Definition Audio Controller (rev 03)
+	Subsystem: Acer Incorporated [ALI] Device 0940
+	Flags: bus master, fast devsel, latency 64, IRQ 51
+	Memory at c1214000 (64-bit, non-prefetchable) [size=16K]
+	Capabilities: [50] Power Management version 3
+	Capabilities: [60] MSI: Enable+ Count=1/1 Maskable- 64bit+
+	Kernel driver in use: snd_hda_intel
+
+00:1c.0 PCI bridge: Intel Corporation Wildcat Point-LP PCI Express Root Port #1 (rev e3) (prog-if 00 [Normal decode])
+	Flags: bus master, fast devsel, latency 0, IRQ 42
+	Bus: primary=00, secondary=01, subordinate=01, sec-latency=0
+	I/O behind bridge: 00002000-00002fff
+	Memory behind bridge: a0100000-a02fffff
+	Prefetchable memory behind bridge: 00000000a0300000-00000000a04fffff
+	Capabilities: [40] Express Root Port (Slot+), MSI 00
+	Capabilities: [80] MSI: Enable+ Count=1/1 Maskable- 64bit-
+	Capabilities: [90] Subsystem: Acer Incorporated [ALI] Device 0940
+	Capabilities: [a0] Power Management version 3
+	Kernel driver in use: pcieport
+
+00:1c.2 PCI bridge: Intel Corporation Wildcat Point-LP PCI Express Root Port #3 (rev e3) (prog-if 00 [Normal decode])
+	Flags: bus master, fast devsel, latency 0, IRQ 43
+	Bus: primary=00, secondary=02, subordinate=02, sec-latency=0
+	I/O behind bridge: 00003000-00003fff
+	Memory behind bridge: c1100000-c11fffff
+	Capabilities: [40] Express Root Port (Slot+), MSI 00
+	Capabilities: [80] MSI: Enable+ Count=1/1 Maskable- 64bit-
+	Capabilities: [90] Subsystem: Acer Incorporated [ALI] Device 0940
+	Capabilities: [a0] Power Management version 3
+	Capabilities: [100] #00
+	Capabilities: [200] L1 PM Substates
+	Kernel driver in use: pcieport
+
+00:1c.3 PCI bridge: Intel Corporation Wildcat Point-LP PCI Express Root Port #4 (rev e3) (prog-if 00 [Normal decode])
+	Flags: bus master, fast devsel, latency 0, IRQ 44
+	Bus: primary=00, secondary=03, subordinate=03, sec-latency=0
+	Memory behind bridge: c1000000-c10fffff
+	Capabilities: [40] Express Root Port (Slot+), MSI 00
+	Capabilities: [80] MSI: Enable+ Count=1/1 Maskable- 64bit-
+	Capabilities: [90] Subsystem: Acer Incorporated [ALI] Device 0940
+	Capabilities: [a0] Power Management version 3
+	Capabilities: [100] #00
+	Capabilities: [200] L1 PM Substates
+	Kernel driver in use: pcieport
+
+00:1f.0 ISA bridge: Intel Corporation Wildcat Point-LP LPC Controller (rev 03)
+	Subsystem: Acer Incorporated [ALI] Device 0940
+	Flags: bus master, medium devsel, latency 0
+	Capabilities: [e0] Vendor Specific Information: Len=0c <?>
+	Kernel driver in use: lpc_ich
+
+00:1f.2 SATA controller: Intel Corporation Wildcat Point-LP SATA Controller [AHCI Mode] (rev 03) (prog-if 01 [AHCI 1.0])
+	Subsystem: Acer Incorporated [ALI] Device 0940
+	Flags: bus master, 66MHz, medium devsel, latency 0, IRQ 47
+	I/O ports at 4088 [size=8]
+	I/O ports at 4094 [size=4]
+	I/O ports at 4080 [size=8]
+	I/O ports at 4090 [size=4]
+	I/O ports at 4060 [size=32]
+	Memory at c121c000 (32-bit, non-prefetchable) [size=2K]
+	Capabilities: [80] MSI: Enable+ Count=1/1 Maskable- 64bit-
+	Capabilities: [70] Power Management version 3
+	Capabilities: [a8] SATA HBA v1.0
+	Kernel driver in use: ahci
+
+00:1f.3 SMBus: Intel Corporation Wildcat Point-LP SMBus Controller (rev 03)
+	Subsystem: Acer Incorporated [ALI] Device 0940
+	Flags: medium devsel, IRQ 255
+	Memory at c1218000 (64-bit, non-prefetchable) [size=256]
+	I/O ports at 4040 [size=32]
+
+00:1f.6 Signal processing controller: Intel Corporation Wildcat Point-LP Thermal Management Controller (rev 03)
+	Subsystem: Acer Incorporated [ALI] Device 0940
+	Flags: bus master, fast devsel, latency 0, IRQ 255
+	Memory at c121b000 (64-bit, non-prefetchable) [size=4K]
+	Capabilities: [50] Power Management version 3
+	Capabilities: [80] MSI: Enable- Count=1/1 Maskable- 64bit-
+
+02:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd. Device 5287 (rev 01)
+	Subsystem: Acer Incorporated [ALI] Device 0940
+	Flags: bus master, fast devsel, latency 0, IRQ 46
+	Memory at c1105000 (32-bit, non-prefetchable) [size=4K]
+	Expansion ROM at c1110000 [disabled] [size=64K]
+	Capabilities: [40] Power Management version 3
+	Capabilities: [50] MSI: Enable+ Count=1/1 Maskable- 64bit+
+	Capabilities: [70] Express Endpoint, MSI 00
+	Capabilities: [b0] MSI-X: Enable- Count=1 Masked-
+	Capabilities: [d0] Vital Product Data
+	Capabilities: [100] Advanced Error Reporting
+	Capabilities: [140] Virtual Channel
+	Capabilities: [160] Device Serial Number 00-00-00-00-00-00-00-00
+	Capabilities: [170] Latency Tolerance Reporting
+	Capabilities: [178] L1 PM Substates
+	Kernel driver in use: rtsx_pci
+
+02:00.1 Ethernet controller: Realtek Semiconductor Co., Ltd. RTL8111/8168/8411 PCI Express Gigabit Ethernet Controller (rev 12)
+	Subsystem: Acer Incorporated [ALI] Device 0940
+	Flags: bus master, fast devsel, latency 0, IRQ 48
+	I/O ports at 3000 [size=256]
+	Memory at c1104000 (64-bit, non-prefetchable) [size=4K]
+	Memory at c1100000 (64-bit, non-prefetchable) [size=16K]
+	Capabilities: [40] Power Management version 3
+	Capabilities: [50] MSI: Enable+ Count=1/1 Maskable- 64bit+
+	Capabilities: [70] Express Endpoint, MSI 01
+	Capabilities: [b0] MSI-X: Enable- Count=4 Masked-
+	Capabilities: [d0] Vital Product Data
+	Capabilities: [100] Advanced Error Reporting
+	Capabilities: [160] Device Serial Number 01-00-00-00-68-4c-e0-00
+	Capabilities: [170] Latency Tolerance Reporting
+	Capabilities: [178] L1 PM Substates
+	Kernel driver in use: r8169
+
+03:00.0 Network controller: Qualcomm Atheros QCA9565 / AR9565 Wireless Network Adapter (rev 01)
+	Subsystem: Lite-On Communications Inc Device 0642
+	Flags: bus master, fast devsel, latency 0, IRQ 19
+	Memory at c1000000 (64-bit, non-prefetchable) [size=512K]
+	Expansion ROM at c1080000 [disabled] [size=64K]
+	Capabilities: [40] Power Management version 2
+	Capabilities: [50] MSI: Enable- Count=1/4 Maskable+ 64bit+
+	Capabilities: [70] Express Endpoint, MSI 00
+	Capabilities: [100] Advanced Error Reporting
+	Capabilities: [140] Virtual Channel
+	Capabilities: [160] Device Serial Number 00-00-00-00-00-00-00-00
+	Kernel driver in use: ath9k
+

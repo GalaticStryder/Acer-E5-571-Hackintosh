@@ -4,49 +4,6 @@
 <dict>
 	<key>ACPI</key>
 	<dict>
-		<key>SortedOrder-Comment</key>
-		<string>This is the original order supported by Clover prior to build v3062.  You can trim it as necessary.</string>
-		<key>SortedOrder</key>
-		<array>
-			<string>SSDT.aml</string>
-			<string>SSDT-0.aml</string>
-			<string>SSDT-1.aml</string>
-			<string>SSDT-2.aml</string>
-			<string>SSDT-3.aml</string>
-			<string>SSDT-4.aml</string>
-			<string>SSDT-5.aml</string>
-			<string>SSDT-6.aml</string>
-			<string>SSDT-7.aml</string>
-			<string>SSDT-8.aml</string>
-			<string>SSDT-9.aml</string>
-			<string>SSDT-10.aml</string>
-			<string>SSDT-11.aml</string>
-			<string>SSDT-12.aml</string>
-			<string>SSDT-13.aml</string>
-			<string>SSDT-14.aml</string>
-			<string>SSDT-15.aml</string>
-			<string>SSDT-16.aml</string>
-			<string>SSDT-17.aml</string>
-			<string>SSDT-18.aml</string>
-			<string>SSDT-19.aml</string>
-		</array>
-		<key>DSDT</key>
-		<dict>
-			<key>Fixes</key>
-			<dict>
-				<key>FixRegions_10000000</key>
-				<true/>
-				<key>NewWay_80000000</key>
-				<true/>
-			</dict>
-		</dict>
-		<key>DropTables</key>
-		<array>
-			<dict>
-				<key>Signature</key>
-				<string>DMAR</string>
-			</dict>
-		</array>
 		<key>#DropTables</key>
 		<array>
 			<dict>
@@ -84,6 +41,23 @@
 				<string>ApIst</string>
 			</dict>
 		</array>
+		<key>DSDT</key>
+		<dict>
+			<key>Fixes</key>
+			<dict>
+				<key>FixRegions_10000000</key>
+				<true/>
+				<key>NewWay_80000000</key>
+				<true/>
+			</dict>
+		</dict>
+		<key>DropTables</key>
+		<array>
+			<dict>
+				<key>Signature</key>
+				<string>DMAR</string>
+			</dict>
+		</array>
 		<key>SSDT</key>
 		<dict>
 			<key>DropOem</key>
@@ -98,6 +72,20 @@
 			<key>PluginType</key>
 			<integer>1</integer>
 		</dict>
+		<key>SortedOrder</key>
+		<array>
+			<string>SSDT1.aml</string>
+			<string>SSDT2.aml</string>
+			<string>SSDT3.aml</string>
+			<string>SSDT4.aml</string>
+			<string>SSDT5.aml</string>
+			<string>SSDT6.aml</string>
+			<string>SSDT7.aml</string>
+			<string>SSDT8.aml</string>
+			<string>SSDT9.aml</string>
+		</array>
+		<key>SortedOrder-Comment</key>
+		<string>This is the original order supported by Clover prior to build v3062.  You can trim it as necessary.</string>
 	</dict>
 	<key>Boot</key>
 	<dict>
@@ -125,9 +113,9 @@
 		</dict>
 		<key>USB</key>
 		<dict>
-			<key>FixOwnership</key>
-			<true/>
 			<key>AddClockID</key>
+			<true/>
+			<key>FixOwnership</key>
 			<true/>
 			<key>Inject</key>
 			<true/>
@@ -139,6 +127,8 @@
 	</array>
 	<key>GUI</key>
 	<dict>
+		<key>#ScreenResolution</key>
+		<string>1366x768</string>
 		<key>Custom</key>
 		<dict>
 			<key>Entries</key>
@@ -167,15 +157,11 @@
 			<key>Tool</key>
 			<true/>
 		</dict>
-		<key>#ScreenResolution</key>
-		<string>1920x1080</string>
 		<key>Theme</key>
 		<string>Bluemac</string>
 	</dict>
 	<key>Graphics</key>
 	<dict>
-		<key>ig-platform-id</key>
-		<string>0x0a260006</string>
 		<key>Inject</key>
 		<dict>
 			<key>ATI</key>
@@ -187,21 +173,23 @@
 		</dict>
 		<key>InjectEDID</key>
 		<false/>
+		<key>ig-platform-id</key>
+		<string>0x0a260006</string>
 	</dict>
 	<key>KernelAndKextPatches</key>
 	<dict>
-		<key>AsusAICPUPM</key>
-		<true/>
 		<key>AppleRTC</key>
 		<true/>
-		<key>KernelLapic</key>
-		<true/>
-		<key>KernelPm</key>
+		<key>AsusAICPUPM</key>
 		<true/>
 		<key>ForceKextsToLoad</key>
 		<array>
 			<string>\System\Library\Extensions\IONetworkingFamily.kext</string>
 		</array>
+		<key>KernelLapic</key>
+		<true/>
+		<key>KernelPm</key>
+		<true/>
 		<key>KextsToPatch</key>
 		<array>
 			<dict>
@@ -209,48 +197,64 @@
 				<string>Enable TRIM for SSD</string>
 				<key>Disabled</key>
 				<true/>
+				<key>Find</key>
+				<data>
+				AEFQUExFIFNTRAA=
+				</data>
 				<key>Name</key>
 				<string>IOAHCIBlockStorage</string>
-				<key>Find</key>
-				<data>AEFQUExFIFNTRAA=</data>
 				<key>Replace</key>
-				<data>AAAAAAAAAAAAAAA=</data>
+				<data>
+				AAAAAAAAAAAAAAA=
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
 				<string>Boot graphics glitch, 10.10.2/10.10.3</string>
 				<key>Disabled</key>
 				<true/>
+				<key>Find</key>
+				<data>
+				QYjE6xE=
+				</data>
 				<key>Name</key>
 				<string>IOGraphicsFamily</string>
-				<key>Find</key>
-				<data>QYjE6xE=</data>
 				<key>Replace</key>
-				<data>QYjE6zE=</data>
+				<data>
+				QYjE6zE=
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
 				<string>HDMI-audio, port 0105, 0x0a260005 0x0a260006, 0x0d220003, 0x0a2e000a, 0x0a26000a</string>
 				<key>Disabled</key>
 				<true/>
+				<key>Find</key>
+				<data>
+				AQUJAAAEAACHAAAA
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFramebufferAzul</string>
-				<key>Find</key>
-				<data>AQUJAAAEAACHAAAA</data>
 				<key>Replace</key>
-				<data>AQUJAAAIAACHAAAA</data>
+				<data>
+				AQUJAAAIAACHAAAA
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
 				<string>Enable 9MB cursor bytes, 0x0a260006</string>
 				<key>Disabled</key>
 				<false/>
+				<key>Find</key>
+				<data>
+				BgAmCgEDAwMAAAACAAAwAQAAYAA=
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFramebufferAzul</string>
-				<key>Find</key>
-				<data>BgAmCgEDAwMAAAACAAAwAQAAYAA=</data>
 				<key>Replace</key>
-				<data>BgAmCgEDAwMAAAACAAAwAQAAkAA=</data>
+				<data>
+				BgAmCgEDAwMAAAACAAAwAQAAkAA=
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
@@ -258,11 +262,15 @@
 				<key>Disabled</key>
 				<true/>
 				<key>Find</key>
-				<data>CAAuCgEDAwMAAAAE</data>
+				<data>
+				CAAuCgEDAwMAAAAE
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFramebufferAzul</string>
 				<key>Replace</key>
-				<data>CAAuCgEDAwMAAAAG</data>
+				<data>
+				CAAuCgEDAwMAAAAG
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
@@ -270,11 +278,15 @@
 				<key>Disabled</key>
 				<true/>
 				<key>Find</key>
-				<data>CAAuCgEDAwMAAAAE</data>
+				<data>
+				CAAuCgEDAwMAAAAE
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFramebufferAzul</string>
 				<key>Replace</key>
-				<data>CAAuCgEDAwMAAAAI</data>
+				<data>
+				CAAuCgEDAwMAAAAI
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
@@ -282,107 +294,143 @@
 				<key>Disabled</key>
 				<true/>
 				<key>Find</key>
-				<data>BgAmCgEDAwMAAAACAAAwAQAAYAA=</data>
+				<data>
+				BgAmCgEDAwMAAAACAAAwAQAAYAA=
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFramebufferAzul</string>
 				<key>Replace</key>
-				<data>BgAmCgEDAwMAAAAIAAAAAwAAAAM=</data>
+				<data>
+				BgAmCgEDAwMAAAAIAAAAAwAAAAM=
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
 				<string>HDMI-audio, port 0204, 0x0a260005 0x0a260006</string>
 				<key>Disabled</key>
 				<true/>
+				<key>Find</key>
+				<data>
+				AgQJAAAEAACHAAAA
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFramebufferAzul</string>
-				<key>Find</key>
-				<data>AgQJAAAEAACHAAAA</data>
 				<key>Replace</key>
-				<data>AgQJAAAIAACHAAAA</data>
+				<data>
+				AgQJAAAIAACHAAAA
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
 				<string>HDMI-audio, port 0105, 0x0a2e0008, 0x0a16000c, 0x0a2e000d, 0x0a26000d</string>
 				<key>Disabled</key>
 				<true/>
+				<key>Find</key>
+				<data>
+				AQUJAAAEAAAHAQAA
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFramebufferAzul</string>
-				<key>Find</key>
-				<data>AQUJAAAEAAAHAQAA</data>
 				<key>Replace</key>
-				<data>AQUJAAAIAAAHAQAA</data>
+				<data>
+				AQUJAAAIAAAHAQAA
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
 				<string>HDMI-audio, port 0204, 0x0a2e0008, 0x0a16000c, 0x0a2e000d, 0x0a26000d</string>
 				<key>Disabled</key>
 				<true/>
+				<key>Find</key>
+				<data>
+				AgQJAAAEAAAHAQAA
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFramebufferAzul</string>
-				<key>Find</key>
-				<data>AgQJAAAEAAAHAQAA</data>
 				<key>Replace</key>
-				<data>AgQJAAAIAAAHAQAA</data>
+				<data>
+				AgQJAAAIAAAHAQAA
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
 				<string>Enable internal display after sleep for 0x0a2e000a, 0x0a26000a</string>
 				<key>Disabled</key>
 				<true/>
+				<key>Find</key>
+				<data>
+				AQAAAEAAAADWAAAABQUAAA==
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFrameBufferAzul</string>
-				<key>Find</key>
-				<data>AQAAAEAAAADWAAAABQUAAA==</data>
 				<key>Replace</key>
-				<data>AQAAAEAAAAAeAAAABQUAAA==</data>
+				<data>
+				AQAAAEAAAAAeAAAABQUAAA==
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
 				<string>HDMI-audio, port 0105(12), 0x0a260005 0x0a260006, 0x0d220003, 0x0a2e000a, 0x0a26000a</string>
 				<key>Disabled</key>
 				<true/>
+				<key>Find</key>
+				<data>
+				AQUJAAAEAACHAAAA
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFramebufferAzul</string>
-				<key>Find</key>
-				<data>AQUJAAAEAACHAAAA</data>
 				<key>Replace</key>
-				<data>AQUSAAAIAACHAAAA</data>
+				<data>
+				AQUSAAAIAACHAAAA
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
 				<string>HDMI-audio, port 0204(12), 0x0a260005 0x0a260006</string>
 				<key>Disabled</key>
 				<true/>
+				<key>Find</key>
+				<data>
+				AgQJAAAEAACHAAAA
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFramebufferAzul</string>
-				<key>Find</key>
-				<data>AgQJAAAEAACHAAAA</data>
 				<key>Replace</key>
-				<data>AgQSAAAIAACHAAAA</data>
+				<data>
+				AgQSAAAIAACHAAAA
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
 				<string>HDMI-audio, port 0105(12), 0x0a2e0008, 0x0a16000c, 0x0a2e000d, 0x0a26000d</string>
 				<key>Disabled</key>
 				<true/>
+				<key>Find</key>
+				<data>
+				AQUJAAAEAAAHAQAA
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFramebufferAzul</string>
-				<key>Find</key>
-				<data>AQUJAAAEAAAHAQAA</data>
 				<key>Replace</key>
-				<data>AQUSAAAIAAAHAQAA</data>
+				<data>
+				AQUSAAAIAAAHAQAA
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
 				<string>HDMI-audio, port 0204(12), 0x0a2e0008, 0x0a16000c, 0x0a2e000d, 0x0a26000d</string>
 				<key>Disabled</key>
 				<true/>
+				<key>Find</key>
+				<data>
+				AgQJAAAEAAAHAQAA
+				</data>
 				<key>Name</key>
 				<string>AppleIntelFramebufferAzul</string>
-				<key>Find</key>
-				<data>AgQJAAAEAAAHAQAA</data>
 				<key>Replace</key>
-				<data>AgQSAAAIAAAHAQAA</data>
+				<data>
+				AgQSAAAIAAAHAQAA
+				</data>
 			</dict>
 			<dict>
 				<key>Comment</key>
@@ -390,34 +438,66 @@
 				<key>Disabled</key>
 				<true/>
 				<key>Find</key>
-				<data>AQAAdRc=</data>
+				<data>
+				AQAAdRc=
+				</data>
 				<key>Name</key>
 				<string>IOGraphicsFamily</string>
 				<key>Replace</key>
-				<data>AQAA6xc=</data>
+				<data>
+				AQAA6xc=
+				</data>
 			</dict>
 		</array>
 	</dict>
 	<key>RtVariables</key>
 	<dict>
-		<key>CsrActiveConfig</key>
-		<string>0x67</string>
 		<key>BooterConfig</key>
 		<string>0x28</string>
+		<key>CsrActiveConfig</key>
+		<string>0x67</string>
 	</dict>
 	<key>SMBIOS</key>
 	<dict>
+		<key>BiosReleaseDate</key>
+		<string>05/24/15</string>
+		<key>BiosVendor</key>
+		<string>Apple Inc.</string>
+		<key>BiosVersion</key>
+		<string>MBA71.88Z.0166.B00.1502131457</string>
+		<key>Board-ID</key>
+		<string>Mac-937CB26E2E02BB01</string>
+		<key>BoardManufacturer</key>
+		<string>Apple Inc.</string>
+		<key>BoardType</key>
+		<integer>10</integer>
+		<key>ChassisAssetTag</key>
+		<string>Air-Enclosure</string>
+		<key>ChassisManufacturer</key>
+		<string>Apple Inc.</string>
+		<key>ChassisType</key>
+		<string>9</string>
+		<key>Family</key>
+		<string>MacBook Air</string>
+		<key>Manufacturer</key>
+		<string>Apple Inc.</string>
+		<key>Mobile</key>
+		<true/>
 		<key>ProductName</key>
-		<string>MacBookPro11,1</string>
-		<key>#ProductName-MacBookAir</key>
-		<string>MacBookAir6,2</string>
+		<string>MacBookAir7,2</string>
+		<key>SerialNumber</key>
+		<string>XXXXXXXXGL25</string>
 		<key>Trust</key>
 		<true/>
+		<key>Version</key>
+		<string>1.0</string>
 	</dict>
 	<key>SystemParameters</key>
 	<dict>
 		<key>InjectKexts</key>
 		<string>Detect</string>
+		<key>InjectSystemID</key>
+		<true/>
 	</dict>
 </dict>
 </plist>

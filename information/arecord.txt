@@ -1,0 +1,4 @@
+**** Lista de Dispositivos CAPTURE Hardware ****
+placa 1: PCH [HDA Intel PCH], dispositivo 0: ALC283 Analog [ALC283 Analog]
+  Dispositivo secundário: 1/1
+  Dispositivo secundário #0: subdevice #0

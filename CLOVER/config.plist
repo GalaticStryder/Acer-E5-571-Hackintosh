@@ -57,15 +57,17 @@
 	<key>Boot</key>
 	<dict>
 		<key>Arguments</key>
-		<string>-v kext-dev-mode=1 dart=0 -gux_defer_usb2 nv_disable=1</string>
+		<string>kext-dev-mode=1 dart=0 -gux_defer_usb2 nv_disable=1</string>
 		<key>Debug</key>
 		<false/>
+		<key>DefaultVolume</key>
+		<string>Macintosh HD</string>
 		<key>Log</key>
 		<false/>
 		<key>NeverHibernate</key>
 		<true/>
 		<key>Secure</key>
-		<false/>
+		<true/>
 		<key>Timeout</key>
 		<integer>3</integer>
 		<key>XMPDetection</key>
@@ -231,22 +233,6 @@
 			</dict>
 			<dict>
 				<key>Comment</key>
-				<string>HDMI-audio, port 0105, 0x0a260005 0x0a260006, 0x0d220003, 0x0a2e000a, 0x0a26000a</string>
-				<key>Disabled</key>
-				<true/>
-				<key>Find</key>
-				<data>
-				AQUJAAAEAACHAAAA
-				</data>
-				<key>Name</key>
-				<string>AppleIntelFramebufferAzul</string>
-				<key>Replace</key>
-				<data>
-				AQUJAAAIAACHAAAA
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
 				<string>Enable 9MB cursor bytes, 0x0a260006</string>
 				<key>Disabled</key>
 				<false/>
@@ -311,134 +297,6 @@
 			</dict>
 			<dict>
 				<key>Comment</key>
-				<string>HDMI-audio, port 0204, 0x0a260005 0x0a260006</string>
-				<key>Disabled</key>
-				<true/>
-				<key>Find</key>
-				<data>
-				AgQJAAAEAACHAAAA
-				</data>
-				<key>Name</key>
-				<string>AppleIntelFramebufferAzul</string>
-				<key>Replace</key>
-				<data>
-				AgQJAAAIAACHAAAA
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>HDMI-audio, port 0105, 0x0a2e0008, 0x0a16000c, 0x0a2e000d, 0x0a26000d</string>
-				<key>Disabled</key>
-				<true/>
-				<key>Find</key>
-				<data>
-				AQUJAAAEAAAHAQAA
-				</data>
-				<key>Name</key>
-				<string>AppleIntelFramebufferAzul</string>
-				<key>Replace</key>
-				<data>
-				AQUJAAAIAAAHAQAA
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>HDMI-audio, port 0204, 0x0a2e0008, 0x0a16000c, 0x0a2e000d, 0x0a26000d</string>
-				<key>Disabled</key>
-				<true/>
-				<key>Find</key>
-				<data>
-				AgQJAAAEAAAHAQAA
-				</data>
-				<key>Name</key>
-				<string>AppleIntelFramebufferAzul</string>
-				<key>Replace</key>
-				<data>
-				AgQJAAAIAAAHAQAA
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>Enable internal display after sleep for 0x0a2e000a, 0x0a26000a</string>
-				<key>Disabled</key>
-				<true/>
-				<key>Find</key>
-				<data>
-				AQAAAEAAAADWAAAABQUAAA==
-				</data>
-				<key>Name</key>
-				<string>AppleIntelFrameBufferAzul</string>
-				<key>Replace</key>
-				<data>
-				AQAAAEAAAAAeAAAABQUAAA==
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>HDMI-audio, port 0105(12), 0x0a260005 0x0a260006, 0x0d220003, 0x0a2e000a, 0x0a26000a</string>
-				<key>Disabled</key>
-				<true/>
-				<key>Find</key>
-				<data>
-				AQUJAAAEAACHAAAA
-				</data>
-				<key>Name</key>
-				<string>AppleIntelFramebufferAzul</string>
-				<key>Replace</key>
-				<data>
-				AQUSAAAIAACHAAAA
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>HDMI-audio, port 0204(12), 0x0a260005 0x0a260006</string>
-				<key>Disabled</key>
-				<true/>
-				<key>Find</key>
-				<data>
-				AgQJAAAEAACHAAAA
-				</data>
-				<key>Name</key>
-				<string>AppleIntelFramebufferAzul</string>
-				<key>Replace</key>
-				<data>
-				AgQSAAAIAACHAAAA
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>HDMI-audio, port 0105(12), 0x0a2e0008, 0x0a16000c, 0x0a2e000d, 0x0a26000d</string>
-				<key>Disabled</key>
-				<true/>
-				<key>Find</key>
-				<data>
-				AQUJAAAEAAAHAQAA
-				</data>
-				<key>Name</key>
-				<string>AppleIntelFramebufferAzul</string>
-				<key>Replace</key>
-				<data>
-				AQUSAAAIAAAHAQAA
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>HDMI-audio, port 0204(12), 0x0a2e0008, 0x0a16000c, 0x0a2e000d, 0x0a26000d</string>
-				<key>Disabled</key>
-				<true/>
-				<key>Find</key>
-				<data>
-				AgQJAAAEAAAHAQAA
-				</data>
-				<key>Name</key>
-				<string>AppleIntelFramebufferAzul</string>
-				<key>Replace</key>
-				<data>
-				AgQSAAAIAAAHAQAA
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
 				<string>Boot graphics glitch, 10.10.x/10.11.x (credit lisai9093, cecekpawon)</string>
 				<key>Disabled</key>
 				<false/>
@@ -455,7 +313,7 @@
 			</dict>
 			<dict>
 				<key>Comment</key>
-				<string>AppleHDA ALC283 (1 of 3)</string>
+				<string>AppleHDA ALC283 (1 of 4)</string>
 				<key>Find</key>
 				<data>
 				PYQI7BA=
@@ -469,7 +327,7 @@
 			</dict>
 			<dict>
 				<key>Comment</key>
-				<string>AppleHDA ALC283 (2 of 3)</string>
+				<string>AppleHDA ALC283 (2 of 4)</string>
 				<key>Find</key>
 				<data>
 				PYUI7BA=
@@ -483,7 +341,7 @@
 			</dict>
 			<dict>
 				<key>Comment</key>
-				<string>AppleHDA ALC283 (3 of 3)</string>
+				<string>AppleHDA ALC283 (3 of 4)</string>
 				<key>Find</key>
 				<data>
 				PYQZ1BE=
@@ -493,6 +351,20 @@
 				<key>Replace</key>
 				<data>
 				PYMC7BA=
+				</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>AppleHDA ALC283 (4 of 4, new in 10.11, credit lisai9093)</string>
+				<key>Find</key>
+				<data>
+				PYMZ1BE=
+				</data>
+				<key>Name</key>
+				<string>AppleHDA</string>
+				<key>Replace</key>
+				<data>
+				PQAAAAA=
 				</data>
 			</dict>
 		</array>

@@ -3,23 +3,38 @@ Mac OS X on the Acer Aspire E5-571-376T
 ![Acer Aspire E5-571-376T](https://raw.githubusercontent.com/GalaticStryder/Acer-E5-571-Hackintosh/master/header.png)
 
 A place/guide for patches that allow booting OSX in the Acer E5-571-376T. Fow now, this repo is under construction (maybe forever), it'll take some time to get something decent as I'm newbie on it (GNU/Linux guy).
+
 All the processes are generically the same for a hackintosh laptop build (Intel), but DSDT/SSDT patching and some more specific things like kexts and stuff should be device/board particular.
 
-**Note:** Board refers to Brodwell, Haswell, Ivy Bridge...
+Notice that I'm not gonna teach someone "how to", there are many places on forums to get every guide you need. If you don't know what are the steps for your model, please checkout tonymac's website/forum and **read** the guides and threads for El Capitan laptop support.
 
-Notice that I'm not gonna teach someone "how to", there are many places on forums to get every guide you need. If you don't know what are the steps for your model, please checkout tonymac's website/forum and **read** the guides and threads for El Capitan Laptop support.
-
-As for Acer laptops, notice that this is one of a thousand other models, any minimal difference might get you a laptop that doesn't boot or even brick it depending on what mess you gonna be doing. That's why I encourage you to **not** follow this guide as a reference for now, even with the same model. If you want to mess around as well... go for it the, I advised.
+As for Acer laptops, notice that this is one of a thousand other models, any minimal difference might get you a laptop that doesn't boot or even brick it depending on what mess you gonna be doing. That's why I encourage you to **not** follow this guide as a reference for now, even with the same model. If you want to mess around as well... go for it then, I advised.
 
 Environment
 -------------------------
 
 I've got two machines to do this job:
 
-- Target **Acer E5-571-376T** laptop running Ubuntu 15.10 in UEFI mode
-- A **desktop computer** running Mac OSX as guest in VirtualBox being hosted by Arch Linux
+- A **desktop computer** running Mac OS X as guest in VirtualBox being hosted by Arch Linux (Linux Kernel 4.3)
 
-To get a decente performance on the guest O.S. you must set 256MB of VRAM for your Mac V.M. trough the .vdi file and use **beamoff** app on startup. Resolution fix can easily be found at a Google search.
+That’s the servo for downloading the **official** installer and for the clovered USB creation.
+
+Note: To get a decente performance on the guest O.S. you must set 256MB of VRAM for your Mac V.M. trough the .vdi file and use **beamoff** app on startup. Resolution fix can easily be found at a Google search.
+
+- Target **Acer E5-571-376T** laptop running Ubuntu 15.10 in UEFI mode (GPT table) and Mac OS X 10.11.2
+
+I totally recommend dual-booting with a Linux distribution, even if you don’t like it, truth is that it won’t let you down if you need the laptop as a daily driver. Not only that, if you patch something wrong and it breaks booting, there’s no worry, boot Ubuntu and copy back the previous configuration to get Mac up and running again.
+
+Usually /dev/sda1 is the EFI partition, so:
+
+	sudo mkdir /mnt/efi
+	sudo mount /dev/sda1 /mnt/efi
+
+Change what you need and umount.
+
+	sudo umount /dev/sda1
+
+It’s worth to mention that my EFI partition wasn’t created by OS X, it has been around since I installed Ubuntu 15.10 some weeks ago, no problems at all once Clover won’t format it anyway.
 
 Hardware
 -------------------------
@@ -78,7 +93,7 @@ Now it should contain one DSDT and a nine SSDTs as **.aml** files, as mentioned 
 
 To patch your DSDT (when I say DSDT means both DSDTs/SSDTs - that's why folder name is "dsdt" as well) you will need to use MaciASL and iasl tools. Copy iasl binary from the folder **tools** to /usr/bin for system-wide ability.
 
-	cd tools
+	cd extras
 	sudo cp iasl /usr/bin/iasl
 
 Cortesy of RehabMan at [BitBucket](https://bitbucket.org/RehabMan/acpica/downloads).
@@ -158,9 +173,9 @@ I needed to patch 4/9 or 5/9 SSDTs, some of them compile just fine without any p
 
 **Other compiling issues:**
 
-Operator has no effect: https://github.com/GalaticStryder/Acer-E5-571-Hackintosh/commit/5c46b2ef43d6cd73f862d6c0eb58bea3c6d8d637
+[Operator has no effect](https://github.com/GalaticStryder/Acer-E5-571-Hackintosh/commit/5c46b2ef43d6cd73f862d6c0eb58bea3c6d8d637)
 
-Audio 12: https://github.com/GalaticStryder/Acer-E5-571-Hackintosh/commit/c626185870a80038bf09026bbbc531e1f45d1736
+[Audio 12](https://github.com/GalaticStryder/Acer-E5-571-Hackintosh/commit/c626185870a80038bf09026bbbc531e1f45d1736)
 From [Machanical](http://www.tonymacx86.com/members/machanical/)
 
 Many errors can be fault of **external declarations**, to sort that out just **cut** the three main external lines that have "1 arguments" or "2 arguments" comment to the bottom of the other external ones with one line space optionally.

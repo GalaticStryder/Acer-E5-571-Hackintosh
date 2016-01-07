@@ -7789,8 +7789,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "ACRSYS", "ACRPRDCT", 0x00000000)
                     "PinConfigurations", Buffer() { },
                     //"MaximumBootBeepVolume", 77,
                 })
-            }
-            
+            }   
         }
 
         Device (ADSP)

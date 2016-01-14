@@ -1,0 +1,28 @@
+# Serial number endings for MacBook Air (13-inch, Early 2015)
+# from Piker Alpha
+
+G944
+G941
+G940
+G942
+G943
+GKJT
+GKJV
+GL20
+GL21
+GL25
+GL24
+GL23
+GL22
+GLCP
+GLCN
+GM15
+GM14
+GM38
+GM6M
+GM9G
+GMC3
+GMD3
+GN8C
+GNJJ
+GNKM

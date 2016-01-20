@@ -1,6 +1,3 @@
-# Serial number endings for MacBook Air (13-inch, Early 2015)
-# from Piker Alpha
-
 G944
 G941
 G940

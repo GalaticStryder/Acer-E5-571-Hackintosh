@@ -14,7 +14,7 @@ week=CDFGHKLMNPQRSTUVWXY
 # Generate a random (yet valid) serial number
 week_letter=`echo ${week:$(($RANDOM%${#week})):1}`
 function random_char { echo ${chars:$(($RANDOM%${#chars})):1}; }
-function random_ending { sort -R sn-endings.txt | head -n 1;  }
+function random_ending { gsort -R sn-endings.txt | head -n 1;  }
 SN=C02P$week_letter$(random_char)$(random_char)$(random_char)$(random_ending)
 
 serialNumberYear=$(echo $SN | cut -c 4)

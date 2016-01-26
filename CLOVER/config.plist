@@ -57,15 +57,11 @@
 	<key>Boot</key>
 	<dict>
 		<key>Arguments</key>
-		<string>kext-dev-mode=1 dart=0 -gux_defer_usb2 nv_disable=1</string>
+		<string>dart=0 -gux_defer_usb2 kext-dev-mode=1</string>
 		<key>Debug</key>
 		<false/>
 		<key>DefaultVolume</key>
 		<string>Macintosh HD</string>
-		<key>Log</key>
-		<false/>
-		<key>NeverHibernate</key>
-		<true/>
 		<key>Secure</key>
 		<true/>
 		<key>Timeout</key>
@@ -75,11 +71,6 @@
 	</dict>
 	<key>Devices</key>
 	<dict>
-		<key>Audio</key>
-		<dict>
-			<key>Inject</key>
-			<integer>0</integer>
-		</dict>
 		<key>USB</key>
 		<dict>
 			<key>AddClockID</key>
@@ -96,17 +87,21 @@
 	</array>
 	<key>GUI</key>
 	<dict>
-		<key>#ScreenResolution</key>
-		<string>1366x768</string>
 		<key>Custom</key>
 		<dict>
 			<key>Entries</key>
 			<array>
 				<dict>
+					<key>Disabled</key>
+					<false/>
 					<key>FullTitle</key>
 					<string>UEFI internal</string>
 					<key>Hidden</key>
 					<string>Always</string>
+					<key>Ignore</key>
+					<false/>
+					<key>NoCaches</key>
+					<false/>
 					<key>Type</key>
 					<string>Other</string>
 				</dict>
@@ -133,7 +128,7 @@
 			<true/>
 		</dict>
 		<key>Theme</key>
-		<string>Bluemac</string>
+		<string>Lightup</string>
 	</dict>
 	<key>Graphics</key>
 	<dict>
@@ -146,7 +141,7 @@
 			<key>NVidia</key>
 			<false/>
 		</dict>
-		<key>InjectEDID</key>
+		<key>NvidiaSingle</key>
 		<false/>
 		<key>ig-platform-id</key>
 		<string>0x16160002</string>
@@ -157,10 +152,16 @@
 		<true/>
 		<key>AsusAICPUPM</key>
 		<true/>
+		<key>Debug</key>
+		<false/>
 		<key>ForceKextsToLoad</key>
 		<array>
 			<string>\System\Library\Extensions\IONetworkingFamily.kext</string>
 		</array>
+		<key>KernelCpu</key>
+		<false/>
+		<key>KernelHaswellE</key>
+		<false/>
 		<key>KernelLapic</key>
 		<true/>
 		<key>KernelPm</key>
@@ -169,18 +170,18 @@
 		<array>
 			<dict>
 				<key>Comment</key>
-				<string>Disable minStolenSize less or equal fStolenMemorySize assertion, 10.10.x (based on Austere.J patch)</string>
+				<string>AppleHDA ALC283 (3 of 4)</string>
 				<key>Disabled</key>
-				<true/>
+				<false/>
 				<key>Find</key>
 				<data>
-				Oc92PA==
+				PYQZ1BE=
 				</data>
 				<key>Name</key>
-				<string>AppleIntelBDWGraphicsFramebuffer</string>
+				<string>AppleHDA</string>
 				<key>Replace</key>
 				<data>
-				Oc/rPA==
+				PYMC7BA=
 				</data>
 			</dict>
 			<dict>
@@ -197,22 +198,6 @@
 				<key>Replace</key>
 				<data>
 				QTnE6z4=
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>Enable TRIM for SSD</string>
-				<key>Disabled</key>
-				<true/>
-				<key>Find</key>
-				<data>
-				AEFQUExFIFNTRAA=
-				</data>
-				<key>Name</key>
-				<string>IOAHCIBlockStorage</string>
-				<key>Replace</key>
-				<data>
-				AAAAAAAAAAAAAAA=
 				</data>
 			</dict>
 			<dict>
@@ -249,6 +234,70 @@
 			</dict>
 			<dict>
 				<key>Comment</key>
+				<string>Enable 128MB DVMT-prealloc, 48MB framebuffer, 48MB cursor bytes, 0x0a260006</string>
+				<key>Disabled</key>
+				<true/>
+				<key>Find</key>
+				<data>
+				BgAmCgEDAwMAAAACAAAwAQAAYAA=
+				</data>
+				<key>Name</key>
+				<string>AppleIntelFramebufferAzul</string>
+				<key>Replace</key>
+				<data>
+				BgAmCgEDAwMAAAAIAAAAAwAAAAM=
+				</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>AppleHDA ALC283 (2 of 4)</string>
+				<key>Disabled</key>
+				<false/>
+				<key>Find</key>
+				<data>
+				PYUI7BA=
+				</data>
+				<key>Name</key>
+				<string>AppleHDA</string>
+				<key>Replace</key>
+				<data>
+				PQAAAAA=
+				</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>AppleHDA ALC283 (4 of 4, new in 10.11, credit lisai9093)</string>
+				<key>Disabled</key>
+				<false/>
+				<key>Find</key>
+				<data>
+				PYMZ1BE=
+				</data>
+				<key>Name</key>
+				<string>AppleHDA</string>
+				<key>Replace</key>
+				<data>
+				PQAAAAA=
+				</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>Enable TRIM for SSD</string>
+				<key>Disabled</key>
+				<true/>
+				<key>Find</key>
+				<data>
+				AEFQUExFIFNTRAA=
+				</data>
+				<key>Name</key>
+				<string>IOAHCIBlockStorage</string>
+				<key>Replace</key>
+				<data>
+				AAAAAAAAAAAAAAA=
+				</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
 				<string>Enable 96MB DVMT-prealloc, 0x0a2e0008</string>
 				<key>Disabled</key>
 				<true/>
@@ -265,6 +314,22 @@
 			</dict>
 			<dict>
 				<key>Comment</key>
+				<string>Disable minStolenSize less or equal fStolenMemorySize assertion, 10.10.x (based on Austere.J patch)</string>
+				<key>Disabled</key>
+				<true/>
+				<key>Find</key>
+				<data>
+				Oc92PA==
+				</data>
+				<key>Name</key>
+				<string>AppleIntelBDWGraphicsFramebuffer</string>
+				<key>Replace</key>
+				<data>
+				Oc/rPA==
+				</data>
+			</dict>
+			<dict>
+				<key>Comment</key>
 				<string>Enable 128MB DVMT-prealloc, 0x0a2e0008</string>
 				<key>Disabled</key>
 				<true/>
@@ -277,22 +342,6 @@
 				<key>Replace</key>
 				<data>
 				CAAuCgEDAwMAAAAI
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>Enable 128MB DVMT-prealloc, 48MB framebuffer, 48MB cursor bytes, 0x0a260006</string>
-				<key>Disabled</key>
-				<true/>
-				<key>Find</key>
-				<data>
-				BgAmCgEDAwMAAAACAAAwAQAAYAA=
-				</data>
-				<key>Name</key>
-				<string>AppleIntelFramebufferAzul</string>
-				<key>Replace</key>
-				<data>
-				BgAmCgEDAwMAAAAIAAAAAwAAAAM=
 				</data>
 			</dict>
 			<dict>
@@ -314,51 +363,11 @@
 			<dict>
 				<key>Comment</key>
 				<string>AppleHDA ALC283 (1 of 4)</string>
+				<key>Disabled</key>
+				<false/>
 				<key>Find</key>
 				<data>
 				PYQI7BA=
-				</data>
-				<key>Name</key>
-				<string>AppleHDA</string>
-				<key>Replace</key>
-				<data>
-				PQAAAAA=
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>AppleHDA ALC283 (2 of 4)</string>
-				<key>Find</key>
-				<data>
-				PYUI7BA=
-				</data>
-				<key>Name</key>
-				<string>AppleHDA</string>
-				<key>Replace</key>
-				<data>
-				PQAAAAA=
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>AppleHDA ALC283 (3 of 4)</string>
-				<key>Find</key>
-				<data>
-				PYQZ1BE=
-				</data>
-				<key>Name</key>
-				<string>AppleHDA</string>
-				<key>Replace</key>
-				<data>
-				PYMC7BA=
-				</data>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>AppleHDA ALC283 (4 of 4, new in 10.11, credit lisai9093)</string>
-				<key>Find</key>
-				<data>
-				PYMZ1BE=
 				</data>
 				<key>Name</key>
 				<string>AppleHDA</string>

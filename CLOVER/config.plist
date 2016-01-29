@@ -384,6 +384,10 @@
 		<string>0x28</string>
 		<key>CsrActiveConfig</key>
 		<string>0x67</string>
+		<key>MLB</key>
+		<string>serial/generate.sh</string>
+		<key>ROM</key>
+		<string>last12digitsofsmuuid</string>
 	</dict>
 	<key>SMBIOS</key>
 	<dict>
@@ -397,6 +401,8 @@
 		<string>Mac-937CB26E2E02BB01</string>
 		<key>BoardManufacturer</key>
 		<string>Apple Inc.</string>
+		<key>BoardSerialNumber</key>
+		<string>serialnumber+5randomcodes</string>
 		<key>BoardType</key>
 		<integer>10</integer>
 		<key>ChassisAssetTag</key>
@@ -413,6 +419,10 @@
 		<true/>
 		<key>ProductName</key>
 		<string>MacBookAir7,2</string>
+		<key>SerialNumber</key>
+		<string>serial/generate.sh</string>
+		<key>SmUUID</key>
+		<string>uuidgen</string>
 		<key>Trust</key>
 		<true/>
 		<key>Version</key>
